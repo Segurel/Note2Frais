@@ -259,7 +259,7 @@ textarea{resize:vertical;min-height:55px}
   function connectDrive() {
     var params = [
       "client_id=" + encodeURIComponent(CLIENT_ID),
-      "redirect_uri=" + encodeURIComponent(https://segurel.github.io/Note2Frais/),
+      "redirect_uri=" + encodeURIComponent("https://segurel.github.io/Note2Frais/"),
       "response_type=token",
       "scope=" + encodeURIComponent(SCOPES),
       "prompt=select_account"
@@ -460,7 +460,7 @@ textarea{resize:vertical;min-height:55px}
       var img = new Image();
       img.onload = function() {
         var c = document.createElement("canvas");
-        var s = Math.min(1, 1200 / img.width);
+        var s = Math.min(1, 1200 / img.width, 1600 / img.height);
         c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
         c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
         curImg = c.toDataURL("image/jpeg", 0.75);
@@ -563,7 +563,7 @@ textarea{resize:vertical;min-height:55px}
     keys.forEach(function(k) {
       var mrs = groups[k]; var mt = mrs.reduce(function(s,r){return s+r.amount;},0);
       var lbl = ""; try { lbl = new Date(k+"-01T12:00:00").toLocaleDateString("fr-FR",{month:"long",year:"numeric"}); lbl=lbl.charAt(0).toUpperCase()+lbl.slice(1); } catch(e){lbl=k;}
-      html += '<div class="mg"><div class="mth"><span>' + lbl + '</span><span class="mtt">' + mt.toFixed(2).replace(".",",") + " EUR</span></div><div class="rgrid">";
+      html += '<div class="mg"><div class="mth"><span>' + lbl + '</span><span class="mtt">' + mt.toFixed(2).replace(".",",") + " EUR</span></div><div class='rgrid'>";
       mrs.forEach(function(r) {
         var dl = ""; try { dl = new Date(r.date+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"short"}); } catch(e){dl=r.date;}
         var im = r.image ? '<img class="rimg" src="'+r.image+'" loading="lazy">' : '<div class="rnimg">&#129413;</div>';
