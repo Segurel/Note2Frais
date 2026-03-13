@@ -150,7 +150,7 @@ textarea{resize:vertical;min-height:55px}
     <span class="capicon">&#128247;</span>
     <div class="captxt">Photographier un recu</div>
     <div class="capsub">Photo ou import &middot; Sauvegarde automatique sur Google Drive</div>
-    <input type="file" id="fi" accept="image/*" capture="environment">
+    <input type="file" id="fi" accept="image/*">
   </div>
 
   <div class="ybar">
@@ -255,36 +255,58 @@ textarea{resize:vertical;min-height:55px}
   }
   function isTokenValid() { return accessToken && Date.now() < tokenExpiry; }
 
-  // ---- GOOGLE OAUTH (popup) ----
+  // ---- GOOGLE OAUTH ----
+  function isIOSPWA() {
+    return (window.navigator.standalone === true) ||
+           (window.matchMedia("(display-mode: standalone)").matches && /iphone|ipad|ipod/i.test(navigator.userAgent));
+  }
+
   function connectDrive() {
+    var REDIRECT = "https://segurel.github.io/Note2Frais/";
     var params = [
       "client_id=" + encodeURIComponent(CLIENT_ID),
-      "redirect_uri=" + encodeURIComponent("https://segurel.github.io/Note2Frais/"),
+      "redirect_uri=" + encodeURIComponent(REDIRECT),
       "response_type=token",
       "scope=" + encodeURIComponent(SCOPES),
       "prompt=select_account"
     ].join("&");
     var url = "https://accounts.google.com/o/oauth2/v2/auth?" + params;
-    // Ouvrir popup
+
+    // iOS PWA : window.open() bloqué et redirect perd le contexte PWA
+    // → on ouvre Safari via <a target="_blank">, on récupère le token au retour
+    if (isIOSPWA()) {
+      sessionStorage.setItem("gd_return", "1");
+      var a = document.createElement("a");
+      a.href = url; a.target = "_blank"; a.rel = "noopener";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      // Mettre à jour la modal pour expliquer ce qui se passe
+      var mbox = document.querySelector("#mo-drive .mbox");
+      if (mbox) mbox.innerHTML =
+        '<div class="mhd"><span class="mtit">Google Drive</span></div>' +
+        '<div class="wbox"><div class="wico">&#9729;</div><div class="wtxt">' +
+        'Une fenêtre Safari s\'est ouverte.<br><br>' +
+        'Connectez-vous à Google, puis <strong>revenez sur cette app</strong> — ' +
+        'la connexion sera automatique.</div></div>' +
+        '<button class="bs" onclick="closeDriveModal()">Annuler</button>';
+      return;
+    }
+
+    // Desktop / Android : popup classique
     var w = 500, h = 600;
-    var left = (screen.width - w) / 2;
-    var top = (screen.height - h) / 2;
-    var popup = window.open(url, "gdrive_auth", "width=" + w + ",height=" + h + ",left=" + left + ",top=" + top);
-    if (!popup) {
-      // Sur iOS PWA, pas de popup -> redirect
+    var left = Math.round((screen.width - w) / 2);
+    var top = Math.round((screen.height - h) / 2);
+    var popup = window.open(url, "gdrive_auth", "width="+w+",height="+h+",left="+left+",top="+top+",scrollbars=yes");
+    if (!popup || popup.closed) {
       sessionStorage.setItem("gd_return", "1");
       window.location.href = url;
       return;
     }
-    // Surveiller le retour du popup
     var timer = setInterval(function() {
       try {
         if (!popup || popup.closed) { clearInterval(timer); return; }
         var hash = popup.location.hash;
         if (hash && hash.indexOf("access_token") !== -1) {
-          clearInterval(timer);
-          popup.close();
-          handleTokenHash(hash);
+          clearInterval(timer); popup.close(); handleTokenHash(hash);
         }
       } catch(e) { /* cross-origin, attendre */ }
     }, 500);
@@ -304,12 +326,23 @@ textarea{resize:vertical;min-height:55px}
     }
   }
 
-  // Gerer le retour apres redirect (iOS PWA)
+  // Gerer le retour apres redirect ou retour depuis Safari (iOS PWA)
   function handleRedirectReturn() {
     var hash = window.location.hash;
     if (hash && hash.indexOf("access_token") !== -1) {
-      history.replaceState({}, document.title, window.location.pathname);
+      history.replaceState({}, document.title, window.location.pathname + window.location.search);
+      sessionStorage.removeItem("gd_return");
       handleTokenHash(hash);
+      return;
+    }
+    // iOS PWA : au retour de Safari, le hash peut être dans l'URL parente
+    // si gd_return est positionné, on attend un court instant et on recheck
+    if (sessionStorage.getItem("gd_return")) {
+      sessionStorage.removeItem("gd_return");
+      // Le token n'est pas encore là : afficher un message d'aide
+      setTimeout(function() {
+        if (!isTokenValid()) toast("Revenez ici après la connexion Google dans Safari", true);
+      }, 1000);
     }
   }
 
@@ -454,21 +487,55 @@ textarea{resize:vertical;min-height:55px}
 
   // ---- CAPTURE ----
   document.getElementById("fi").addEventListener("change", function(e) {
-    var file = e.target.files[0]; if (!file) return;
-    var rd = new FileReader();
-    rd.onload = function(ev) {
-      var img = new Image();
-      img.onload = function() {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    // Réinitialiser l'input tout de suite pour permettre re-sélection
+    var inputEl = this;
+    function resetInput() { try { inputEl.value = ""; } catch(err) {} }
+
+    // Utiliser un blob URL comme source (plus fiable sur iOS Safari/PWA)
+    var blobUrl = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function() {
+      try {
         var c = document.createElement("canvas");
         var s = Math.min(1, 1200 / img.width, 1600 / img.height);
-        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        c.width = Math.round(img.width * s);
+        c.height = Math.round(img.height * s);
         c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
         curImg = c.toDataURL("image/jpeg", 0.75);
-        openAdd();
-      };
-      img.src = ev.target.result;
+      } catch(err) {
+        // Canvas bloqué (ex: image HEIC non décodée) → utiliser le blob directement
+        curImg = blobUrl;
+        blobUrl = null; // ne pas révoquer
+      }
+      URL.revokeObjectURL(blobUrl);
+      resetInput();
+      openAdd();
     };
-    rd.readAsDataURL(file); this.value = "";
+    img.onerror = function() {
+      // iOS peut échouer sur HEIC → fallback FileReader
+      URL.revokeObjectURL(blobUrl);
+      var rd = new FileReader();
+      rd.onload = function(ev) {
+        var img2 = new Image();
+        img2.onload = function() {
+          var c = document.createElement("canvas");
+          var s = Math.min(1, 1200 / img2.width, 1600 / img2.height);
+          c.width = Math.round(img2.width * s);
+          c.height = Math.round(img2.height * s);
+          c.getContext("2d").drawImage(img2, 0, 0, c.width, c.height);
+          curImg = c.toDataURL("image/jpeg", 0.75);
+          resetInput();
+          openAdd();
+        };
+        img2.onerror = function() { resetInput(); toast("Impossible de lire l'image", true); };
+        img2.src = ev.target.result;
+      };
+      rd.onerror = function() { resetInput(); toast("Impossible de lire l'image", true); };
+      rd.readAsDataURL(file);
+    };
+    img.src = blobUrl;
   });
 
   function openAdd() {
