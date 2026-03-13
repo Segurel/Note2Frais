@@ -750,27 +750,34 @@ textarea{resize:vertical;min-height:55px}
   // ---- CAPTURE ----
   document.getElementById("fi").addEventListener("change", function(e) {
     var file = e.target.files && e.target.files[0];
-    if (!file) return;
+    if (!file) { toast("Aucun fichier reçu", true); return; }
+    toast("Fichier reçu : " + file.name);
     var inputEl = this;
     function resetInput() { try { inputEl.value = ""; } catch(err) {} }
 
     var blobUrl = URL.createObjectURL(file);
     var img = new Image();
     img.onload = function() {
+      toast("Image chargée " + img.width + "x" + img.height);
       URL.revokeObjectURL(blobUrl);
       resetInput();
-      openCrop(img);
+      try {
+        openCrop(img);
+      } catch(err) {
+        toast("Erreur openCrop: " + err.message, true);
+      }
     };
     img.onerror = function() {
+      toast("blobUrl échoué, fallback FileReader");
       URL.revokeObjectURL(blobUrl);
       var rd = new FileReader();
       rd.onload = function(ev) {
         var img2 = new Image();
-        img2.onload = function() { resetInput(); openCrop(img2); };
-        img2.onerror = function() { resetInput(); toast("Impossible de lire l'image", true); };
+        img2.onload = function() { resetInput(); try { openCrop(img2); } catch(err) { toast("Erreur openCrop2: " + err.message, true); } };
+        img2.onerror = function() { resetInput(); toast("img2 onerror", true); };
         img2.src = ev.target.result;
       };
-      rd.onerror = function() { resetInput(); toast("Impossible de lire l'image", true); };
+      rd.onerror = function() { resetInput(); toast("FileReader échoué", true); };
       rd.readAsDataURL(file);
     };
     img.src = blobUrl;
