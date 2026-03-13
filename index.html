@@ -314,7 +314,7 @@ textarea{resize:vertical;min-height:55px}
         '<div class="mhd"><span class="mtit">Google Drive</span></div>' +
         '<div class="wbox"><div class="wico">&#9729;</div><div class="wtxt">' +
         'Une fenêtre Safari s\'est ouverte.<br><br>' +
-        'Connectez-vous à Google, puis <strong>revenez sur cette app</strong> — ' +
+        'Connectez-vous à Google, puis <strong>revenez sur cette app</strong> &mdash; ' +
         'la connexion sera automatique.</div></div>' +
         '<button class="bs" onclick="closeDriveModal()">Annuler</button>';
       return;
@@ -750,34 +750,27 @@ textarea{resize:vertical;min-height:55px}
   // ---- CAPTURE ----
   document.getElementById("fi").addEventListener("change", function(e) {
     var file = e.target.files && e.target.files[0];
-    if (!file) { toast("Aucun fichier reçu", true); return; }
-    toast("Fichier reçu : " + file.name);
+    if (!file) return;
     var inputEl = this;
     function resetInput() { try { inputEl.value = ""; } catch(err) {} }
 
     var blobUrl = URL.createObjectURL(file);
     var img = new Image();
     img.onload = function() {
-      toast("Image chargée " + img.width + "x" + img.height);
       URL.revokeObjectURL(blobUrl);
       resetInput();
-      try {
-        openCrop(img);
-      } catch(err) {
-        toast("Erreur openCrop: " + err.message, true);
-      }
+      try { openCrop(img); } catch(err) { toast("Erreur: " + err.message, true); }
     };
     img.onerror = function() {
-      toast("blobUrl échoué, fallback FileReader");
       URL.revokeObjectURL(blobUrl);
       var rd = new FileReader();
       rd.onload = function(ev) {
         var img2 = new Image();
-        img2.onload = function() { resetInput(); try { openCrop(img2); } catch(err) { toast("Erreur openCrop2: " + err.message, true); } };
-        img2.onerror = function() { resetInput(); toast("img2 onerror", true); };
+        img2.onload = function() { resetInput(); openCrop(img2); };
+        img2.onerror = function() { resetInput(); toast("Impossible de lire l'image", true); };
         img2.src = ev.target.result;
       };
-      rd.onerror = function() { resetInput(); toast("FileReader échoué", true); };
+      rd.onerror = function() { resetInput(); toast("Impossible de lire l'image", true); };
       rd.readAsDataURL(file);
     };
     img.src = blobUrl;
@@ -885,7 +878,7 @@ textarea{resize:vertical;min-height:55px}
       return '<button class="ybtn' + (y == selYear ? " ac" : "") + '" onclick="setYear(' + y + ')">' + y + "</button>";
     }).join("");
 
-    // Filtres mois — uniquement les mois ayant des reçus pour l'année sélectionnée
+    // Filtres mois - uniquement les mois ayant des recus pour l'annee selectionnee
     var recusAnnee = receipts.filter(function(r) { return r.date && r.date.indexOf(String(selYear)) === 0; });
     var uniqM = [];
     recusAnnee.forEach(function(r) { var m = r.date.slice(5,7); if (uniqM.indexOf(m) === -1) uniqM.push(m); });
@@ -909,7 +902,7 @@ textarea{resize:vertical;min-height:55px}
     document.getElementById("stat-total").textContent = tot.toFixed(2).replace(".", ",") + " EUR";
     document.getElementById("stat-count").textContent = f.length;
     var periodeLbl = selMonth ? MOIS[parseInt(selMonth,10)-1] + " " + selYear : String(selYear);
-    document.getElementById("fcnt").textContent = f.length + " recu" + (f.length !== 1 ? "s" : "") + " — " + tot.toFixed(2).replace(".", ",") + " EUR";
+    document.getElementById("fcnt").textContent = f.length + " recu" + (f.length !== 1 ? "s" : "") + " - " + tot.toFixed(2).replace(".", ",") + " EUR";
     var c = document.getElementById("rcont");
     if (!f.length) { c.innerHTML = '<div class="empty"><div class="eico">&#129413;</div><div class="etit">Aucun recu pour ' + periodeLbl + '</div><div class="etxt">Photographiez votre premier recu.</div></div>'; return; }
     var groups = {};
@@ -924,7 +917,7 @@ textarea{resize:vertical;min-height:55px}
         var dl = ""; try { dl = new Date(r.date+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"short"}); } catch(e){dl=r.date;}
         var im = r.image ? '<img class="rimg" src="'+r.image+'" loading="lazy">' : '<div class="rnimg">&#129413;</div>';
         var dr = r.driveLink ? '<div class="rdrive">Drive</div>' : "";
-        html += '<div class="rcard" onclick="openDet('+JSON.stringify(r.id)+')">' + im + dr + '<div class="rbadge">OK</div><div class="rbody"><div class="rplace">'+r.place+'</div><div class="rdate">'+dl+'</div><div class="ramt">'+r.amount.toFixed(2).replace(".",",")+" EUR</div></div></div>';
+        html += '<div class="rcard" onclick="openDet('+JSON.stringify(r.id)+')">' + im + dr + '<div class="rbadge">OK</div><div class="rbody"><div class="rplace">'+r.place+'</div><div class="rdate">'+dl+'</div><div class="ramt">'+r.amount.toFixed(2).replace('.',',')+' EUR</div></div></div>';
       });
       html += "</div></div>";
     });
