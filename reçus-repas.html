@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MesReçus — Frais de repas</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1a1612;--paper:#f5f0e8;--cream:#ede8dc;--accent:#c8522a;--gold:#b89a4e;--muted:#7a7268;--success:#3a7d5a;--border:#d4cfc4;--fbx:#e2001a;--shadow:0 2px 16px rgba(26,22,18,0.1);--shadow-lg:0 8px 40px rgba(26,22,18,0.15);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden;}
+header{background:var(--ink);color:var(--paper);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.3);gap:1rem;flex-wrap:wrap;}
+.logo{display:flex;flex-direction:column;line-height:1;}
+.logo-title{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--paper);}
+.logo-sub{font-size:0.6rem;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px;}
+.header-right{display:flex;align-items:center;gap:1.5rem;}
+.header-stats{display:flex;gap:1.5rem;}
+.stat{text-align:right;}
+.stat-val{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--gold);display:block;}
+.stat-label{font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:#a09880;}
+.fbx-btn{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1rem;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.78rem;font-weight:500;cursor:pointer;border:none;transition:all 0.2s;white-space:nowrap;}
+.fbx-btn.connect{background:var(--fbx);color:white;}
+.fbx-btn.connect:hover{background:#b5001a;}
+.fbx-btn.connected{background:rgba(255,255,255,0.1);color:#ffaaaa;border:1px solid rgba(255,255,255,0.15);}
+.fbx-btn.connected:hover{background:rgba(255,255,255,0.15);}
+.fbx-dot{width:7px;height:7px;border-radius:50%;background:#5cb85c;flex-shrink:0;}
+/* SETUP MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(20,16,12,0.85);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--paper);border-radius:20px;padding:1.8rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;transform:translateY(20px);transition:transform 0.3s;box-shadow:var(--shadow-lg);}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.3rem;}
+.modal-title{font-family:'DM Serif Display',serif;font-size:1.3rem;}
+.close-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.9rem;color:var(--muted);transition:all 0.2s;}
+.close-btn:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+/* SETUP STEPS */
+.setup-step{display:none;} .setup-step.active{display:block;}
+.step-title{font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:0.6rem;}
+.step-desc{font-size:0.82rem;color:var(--muted);line-height:1.6;margin-bottom:1rem;}
+.step-desc strong{color:var(--ink);}
+.step-desc code{background:var(--cream);padding:2px 6px;border-radius:4px;font-size:0.78rem;}
+.form-group{display:flex;flex-direction:column;gap:0.3rem;margin-bottom:0.75rem;}
+label{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+input,textarea{padding:0.6rem 0.85rem;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.88rem;background:white;color:var(--ink);transition:border-color 0.2s;outline:none;}
+input:focus,textarea:focus{border-color:var(--accent);}
+textarea{resize:vertical;min-height:55px;}
+.btn-primary{width:100%;padding:0.85rem;background:var(--accent);color:white;border:none;border-radius:10px;font-family:'DM Serif Display',serif;font-size:1.05rem;cursor:pointer;transition:all 0.2s;margin-top:0.5rem;}
+.btn-primary:hover{background:#a8421a;}
+.btn-secondary{width:100%;padding:0.75rem;background:transparent;color:var(--ink);border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.88rem;cursor:pointer;transition:all 0.2s;margin-top:0.5rem;}
+.btn-secondary:hover{border-color:var(--ink);}
+.waiting-box{background:var(--cream);border-radius:12px;padding:1.2rem;text-align:center;margin:1rem 0;}
+.waiting-icon{font-size:2rem;margin-bottom:0.5rem;}
+.waiting-text{font-size:0.82rem;color:var(--muted);line-height:1.5;}
+.waiting-text strong{color:var(--ink);}
+.progress-dots{display:flex;gap:6px;justify-content:center;margin-top:0.75rem;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);}
+.dot.active{background:var(--accent);animation:dotpulse 1s infinite;}
+@keyframes dotpulse{0%,100%{opacity:1}50%{opacity:0.3}}
+/* SYNC BAR */
+.sync-bar{display:none;align-items:center;gap:0.6rem;padding:0.6rem 1rem;background:white;border:1.5px solid var(--border);border-radius:10px;margin-bottom:1.2rem;font-size:0.78rem;color:var(--muted);}
+.sync-bar.show{display:flex;}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background 0.3s;}
+.sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite;}
+.sync-dot.ok{background:var(--success);}
+.sync-dot.error{background:#c0392b;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.sync-text{flex:1;}
+.btn-sync-now{padding:0.3rem 0.7rem;background:var(--ink);color:var(--paper);border:none;border-radius:6px;font-size:0.72rem;cursor:pointer;}
+.btn-sync-now:hover{background:var(--accent);}
+/* MAIN */
+main{max-width:900px;margin:0 auto;padding:2rem 1.5rem;position:relative;z-index:1;}
+.capture-zone{background:var(--ink);border-radius:16px;padding:2.2rem;text-align:center;cursor:pointer;transition:all 0.3s;margin-bottom:1.5rem;position:relative;overflow:hidden;}
+.capture-zone::before{content:'';position:absolute;inset:2px;border:2px dashed #3a3530;border-radius:14px;pointer-events:none;}
+.capture-zone:hover{background:#252018;transform:translateY(-1px);box-shadow:var(--shadow-lg);}
+.capture-zone:hover::before{border-color:var(--accent);}
+.capture-icon{font-size:2.2rem;margin-bottom:0.6rem;display:block;}
+.capture-text{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--paper);margin-bottom:0.3rem;}
+.capture-sub{font-size:0.78rem;color:#6a6458;}
+#file-input{display:none;}
+.year-bar{display:flex;align-items:center;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.year-label{font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-right:0.4rem;}
+.year-btn{padding:0.32rem 0.85rem;border:1.5px solid var(--border);background:transparent;color:var(--muted);border-radius:20px;font-family:'DM Sans',sans-serif;font-size:0.78rem;cursor:pointer;transition:all 0.2s;}
+.year-btn:hover{border-color:var(--accent);color:var(--accent);}
+.year-btn.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+.export-bar{background:white;border:1.5px solid var(--border);border-radius:12px;padding:0.9rem 1.3rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap;}
+.export-info{font-size:0.78rem;color:var(--muted);line-height:1.5;}
+.export-info strong{color:var(--ink);}
+.btn-export{padding:0.55rem 1.1rem;background:var(--ink);color:var(--paper);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.78rem;cursor:pointer;white-space:nowrap;transition:all 0.2s;display:flex;align-items:center;gap:0.4rem;}
+.btn-export:hover{background:var(--accent);}
+.section-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:0.8rem;}
+.section-title{font-family:'DM Serif Display',serif;font-size:1.1rem;}
+.section-count{font-size:0.72rem;color:var(--muted);}
+.month-group{margin-bottom:1.8rem;}
+.month-title{font-size:0.68rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);padding-bottom:0.4rem;border-bottom:1px solid var(--border);margin-bottom:0.7rem;display:flex;justify-content:space-between;}
+.month-total{font-weight:600;color:var(--accent);}
+.receipts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.7rem;}
+.receipt-card{background:white;border-radius:12px;overflow:hidden;border:1.5px solid var(--border);cursor:pointer;transition:all 0.2s;position:relative;}
+.receipt-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow);}
+.receipt-img{width:100%;height:120px;object-fit:cover;display:block;background:var(--cream);}
+.receipt-no-img{width:100%;height:120px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:var(--border);}
+.receipt-body{padding:0.6rem 0.85rem;}
+.receipt-place{font-weight:600;font-size:0.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.receipt-date{font-size:0.68rem;color:var(--muted);margin-top:0.1rem;}
+.receipt-amount{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--accent);margin-top:0.15rem;}
+.receipt-badge{position:absolute;top:7px;right:7px;background:var(--ink);color:var(--gold);font-size:0.58rem;letter-spacing:0.1em;padding:2px 6px;border-radius:10px;text-transform:uppercase;}
+.receipt-nas{position:absolute;top:7px;left:7px;background:var(--fbx);color:white;font-size:0.58rem;padding:2px 6px;border-radius:10px;}
+.image-preview{width:100%;max-height:200px;object-fit:contain;border-radius:10px;background:var(--cream);border:1.5px solid var(--border);margin-bottom:1.1rem;display:block;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;}
+.form-group-inline{display:flex;flex-direction:column;gap:0.3rem;}
+.form-group-inline.full{grid-column:1/-1;}
+.detail-img{width:100%;max-height:280px;object-fit:contain;border-radius:10px;background:var(--cream);border:1.5px solid var(--border);margin-bottom:0.9rem;cursor:pointer;}
+.detail-row{display:flex;justify-content:space-between;align-items:baseline;padding:0.55rem 0;border-bottom:1px solid var(--cream);}
+.detail-key{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);}
+.detail-val{font-weight:500;font-size:0.88rem;}
+.detail-amount-big{font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--accent);text-align:center;margin:0.9rem 0;}
+.btn-danger{width:100%;padding:0.65rem;background:transparent;color:#c0392b;border:1.5px solid #c0392b;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;cursor:pointer;margin-top:0.9rem;transition:all 0.2s;}
+.btn-danger:hover{background:#c0392b;color:white;}
+.fullscreen-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;cursor:zoom-out;}
+.fullscreen-overlay.open{opacity:1;pointer-events:all;}
+.fullscreen-overlay img{max-width:95vw;max-height:95vh;object-fit:contain;}
+.empty-state{text-align:center;padding:3.5rem 2rem;color:var(--muted);}
+.empty-icon{font-size:2.8rem;margin-bottom:0.9rem;}
+.empty-title{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--ink);margin-bottom:0.5rem;}
+.empty-text{font-size:0.82rem;line-height:1.6;}
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--success);color:white;padding:0.7rem 1.4rem;border-radius:30px;font-size:0.82rem;opacity:0;transition:all 0.3s;z-index:1000;font-weight:500;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.error{background:#c0392b;}
+@media(max-width:600px){header{padding:1rem;}main{padding:1rem;}.form-row{grid-template-columns:1fr;}.receipts-grid{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-title">MesReçus</span>
+    <span class="logo-sub">Frais de repas · Impôts</span>
+  </div>
+  <div class="header-right">
+    <div class="header-stats">
+      <div class="stat"><span class="stat-val" id="stat-total">0,00 €</span><span class="stat-label">Total année</span></div>
+      <div class="stat"><span class="stat-val" id="stat-count">0</span><span class="stat-label">Reçus</span></div>
+    </div>
+    <button class="fbx-btn connect" id="fbx-btn" onclick="handleFbxBtn()">📦 Freebox NAS</button>
+  </div>
+</header>
+
+<main>
+  <div class="sync-bar" id="sync-bar">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span class="sync-text" id="sync-text">Freebox connectée</span>
+    <button class="btn-sync-now" onclick="syncAll()">Synchroniser</button>
+  </div>
+
+  <div class="capture-zone" onclick="document.getElementById('file-input').click()">
+    <span class="capture-icon">📸</span>
+    <div class="capture-text">Photographier un reçu</div>
+    <div class="capture-sub">Photo ou import · Sauvegarde sur disque USB Freebox</div>
+    <input type="file" id="file-input" accept="image/*" capture="environment">
+  </div>
+
+  <div class="year-bar">
+    <span class="year-label">Année :</span>
+    <div id="year-filters"></div>
+  </div>
+
+  <div class="export-bar">
+    <div class="export-info">
+      <strong>Justificatif fiscal</strong> — Photos stockées sur votre disque USB Freebox dans <code style="background:var(--cream);padding:1px 5px;border-radius:3px;font-size:0.72rem">MesRecus/</code>
+    </div>
+    <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+
+  <div class="section-header">
+    <span class="section-title">Mes reçus</span>
+    <span class="section-count" id="filter-count"></span>
+  </div>
+  <div id="receipts-container"></div>
+</main>
+
+<!-- SETUP MODAL (multi-étapes) -->
+<div class="modal-overlay" id="setup-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="setup-modal-title">Connexion Freebox</span>
+      <button class="close-btn" onclick="closeSetup()">✕</button>
+    </div>
+
+    <!-- Étape 1 : URL Freebox -->
+    <div class="setup-step active" id="step-1">
+      <div class="step-title">① Adresse de votre Freebox</div>
+      <div class="step-desc">
+        Entrez l'adresse distante de votre Freebox.<br>
+        Activez d'abord : <strong>mafreebox.freebox.fr → Paramètres → Gestion des accès → Accès à distance</strong><br><br>
+        L'adresse ressemble à <code>https://xxxxxxxx.fbxos.fr</code> ou votre IP publique.
+      </div>
+      <div class="form-group">
+        <label>Adresse Freebox</label>
+        <input type="url" id="fbx-url" placeholder="https://xxxxxxxx.fbxos.fr" spellcheck="false">
+      </div>
+      <div class="form-group">
+        <label>Dossier de stockage (sur le disque USB)</label>
+        <input type="text" id="fbx-folder" value="MesRecus" placeholder="MesRecus">
+      </div>
+      <button class="btn-primary" onclick="startRegistration()">Continuer →</button>
+    </div>
+
+    <!-- Étape 2 : En attente d'autorisation physique -->
+    <div class="setup-step" id="step-2">
+      <div class="step-title">② Autoriser sur la Freebox</div>
+      <div class="step-desc">
+        Une notification apparaît sur votre <strong>écran Freebox</strong> ou dans <strong>l'interface mafreebox.freebox.fr</strong>.<br><br>
+        Appuyez sur <strong>le bouton ➤ de la télécommande</strong> ou cliquez <strong>Autoriser</strong> dans l'interface web pour valider l'accès.
+      </div>
+      <div class="waiting-box">
+        <div class="waiting-icon">📺</div>
+        <div class="waiting-text">En attente de votre autorisation sur la <strong>Freebox Pop</strong>…</div>
+        <div class="progress-dots">
+          <div class="dot active"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+      <button class="btn-secondary" onclick="cancelRegistration()">Annuler</button>
+    </div>
+
+    <!-- Étape 3 : Succès -->
+    <div class="setup-step" id="step-3">
+      <div class="step-title">✓ Freebox connectée !</div>
+      <div class="step-desc">
+        L'application est autorisée. Vos reçus seront désormais sauvegardés automatiquement sur votre disque USB Freebox.
+      </div>
+      <div class="waiting-box" style="background:#eafbf0">
+        <div class="waiting-icon">✅</div>
+        <div class="waiting-text" style="color:#2a6045">Connexion établie avec succès.<br>Le token est sauvegardé pour les prochaines sessions.</div>
+      </div>
+      <button class="btn-primary" onclick="closeSetup()">C'est parti !</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Nouveau reçu</span><button class="close-btn" onclick="closeAddModal()">✕</button></div>
+    <img id="preview-img" class="image-preview" src="" alt="" style="display:none">
+    <div class="form-row">
+      <div class="form-group-inline"><label>Date</label><input type="date" id="f-date"></div>
+      <div class="form-group-inline"><label>Montant (€)</label><input type="number" id="f-amount" step="0.01" placeholder="12,50"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group-inline full"><label>Lieu / Restaurant</label><input type="text" id="f-place" placeholder="Brasserie du Marché"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group-inline full"><label>Motif professionnel (optionnel)</label><textarea id="f-notes" placeholder="Déjeuner de travail avec client X..."></textarea></div>
+    </div>
+    <button class="btn-primary" onclick="saveReceipt()">💾 Enregistrer</button>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Détail du reçu</span><button class="close-btn" onclick="closeDetailModal()">✕</button></div>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<div class="fullscreen-overlay" id="fullscreen" onclick="closeFullscreen()">
+  <img id="fullscreen-img" src="" alt="">
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+//  ÉTAT & CONSTANTES
+// ═══════════════════════════════════════
+const SK = 'mesrecus_v3';
+const APP_ID = 'fr.mesrecus.webapp';
+const APP_NAME = 'MesReçus';
+const APP_VERSION = '1.0.0';
+const DEVICE_NAME = 'Navigateur Web';
+
+let receipts = [], selYear = new Date().getFullYear(), curImg = null;
+let fbxUrl = null, fbxFolder = 'MesRecus';
+let appToken = null, sessionToken = null, sessionExpiry = 0;
+let pollInterval = null;
+
+// ═══════════════════════════════════════
+//  STOCKAGE LOCAL
+// ═══════════════════════════════════════
+function loadLocal() {
+  try { receipts = JSON.parse(localStorage.getItem(SK)) || []; } catch { receipts = []; }
+  fbxUrl    = localStorage.getItem('fbx_url') || null;
+  fbxFolder = localStorage.getItem('fbx_folder') || 'MesRecus';
+  appToken  = localStorage.getItem('fbx_app_token') || null;
+  if (fbxUrl) document.getElementById('fbx-url').value = fbxUrl;
+  document.getElementById('fbx-folder').value = fbxFolder;
+}
+function saveLocal() { localStorage.setItem(SK, JSON.stringify(receipts)); }
+
+// ═══════════════════════════════════════
+//  API FREEBOX — HELPERS
+// ═══════════════════════════════════════
+function api(path, opts = {}) {
+  const base = (fbxUrl || '').replace(/\/$/, '');
+  return fetch(`${base}/api/v6${path}`, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(sessionToken ? { 'X-Fbx-App-Auth': sessionToken } : {}),
+      ...(opts.headers || {})
+    }
+  }).then(r => r.json());
+}
+
+// HMAC-SHA1 (WebCrypto)
+async function hmacSha1(key, msg) {
+  const enc = new TextEncoder();
+  const k = await crypto.subtle.importKey('raw', enc.encode(key), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', k, enc.encode(msg));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// ═══════════════════════════════════════
+//  AUTHENTIFICATION
+// ═══════════════════════════════════════
+
+// Étape 1 : demander un app_token (une seule fois)
+async function registerApp() {
+  const res = await api('/login/authorize/', {
+    method: 'POST',
+    body: JSON.stringify({ app_id: APP_ID, app_name: APP_NAME, app_version: APP_VERSION, device_name: DEVICE_NAME })
+  });
+  if (!res.success) throw new Error(res.msg || 'Erreur autorisation');
+  appToken = res.result.app_token;
+  localStorage.setItem('fbx_app_token', appToken);
+  return res.result.track_id;
+}
+
+// Surveiller le statut de la demande d'autorisation
+async function pollStatus(trackId) {
+  return new Promise((resolve, reject) => {
+    let dots = 0;
+    pollInterval = setInterval(async () => {
+      try {
+        const res = await api(`/login/authorize/${trackId}`);
+        const status = res.result?.status;
+        dots = (dots + 1) % 3;
+        document.querySelectorAll('.progress-dots .dot').forEach((d, i) => {
+          d.classList.toggle('active', i === dots);
+        });
+        if (status === 'granted') {
+          clearInterval(pollInterval);
+          resolve();
+        } else if (status === 'denied' || status === 'timeout') {
+          clearInterval(pollInterval);
+          reject(new Error('Autorisation refusée ou expirée'));
+        }
+      } catch (e) {
+        clearInterval(pollInterval);
+        reject(e);
+      }
+    }, 2000);
+  });
+}
+
+// Ouvrir une session (à chaque démarrage ou expiration)
+async function openSession() {
+  if (sessionToken && Date.now() < sessionExpiry) return true;
+  if (!appToken) return false;
+  try {
+    // 1. Récupérer le challenge
+    const loginRes = await api('/login/');
+    if (!loginRes.success) return false;
+    const challenge = loginRes.result.challenge;
+    // 2. Calculer le password = HMAC-SHA1(app_token, challenge)
+    const password = await hmacSha1(appToken, challenge);
+    // 3. Ouvrir la session
+    const sessRes = await api('/login/session/', {
+      method: 'POST',
+      body: JSON.stringify({ app_id: APP_ID, app_version: APP_VERSION, password })
+    });
+    if (!sessRes.success) return false;
+    sessionToken = sessRes.result.session_token;
+    sessionExpiry = Date.now() + 55 * 60 * 1000; // ~55 min
+    return true;
+  } catch { return false; }
+}
+
+// ═══════════════════════════════════════
+//  UPLOAD SUR FREEBOX
+// ═══════════════════════════════════════
+
+// Encoder un chemin en base64 pour l'API Freebox fs
+function b64Path(path) {
+  return btoa(unescape(encodeURIComponent(path)));
+}
+
+async function ensureFolder() {
+  const ok = await openSession();
+  if (!ok) throw new Error('Session invalide');
+  // Créer le dossier si besoin
+  try {
+    await api('/fs/mkdir/', {
+      method: 'POST',
+      body: JSON.stringify({ parent: b64Path('/'), dirname: fbxFolder })
+    });
+  } catch { /* dossier existe déjà */ }
+}
+
+async function uploadFileFbx(filename, base64data) {
+  const ok = await openSession();
+  if (!ok) throw new Error('Session invalide');
+  // Convertir base64 → Blob
+  const bin = atob(base64data.split(',')[1]);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  const blob = new Blob([arr], { type: 'image/jpeg' });
+  // Créer l'upload
+  const uploadRes = await api('/upload/', {
+    method: 'POST',
+    body: JSON.stringify({
+      dirname: b64Path(`/${fbxFolder}`),
+      upload_name: filename
+    })
+  });
+  if (!uploadRes.success) throw new Error('Impossible de créer l\'upload');
+  const uploadId = uploadRes.result.id;
+  // Envoyer le fichier
+  const base = (fbxUrl || '').replace(/\/$/, '');
+  const sendRes = await fetch(`${base}/api/v6/upload/${uploadId}/send`, {
+    method: 'POST',
+    headers: { 'X-Fbx-App-Auth': sessionToken },
+    body: blob
+  });
+  const sendJson = await sendRes.json();
+  if (!sendJson.success) throw new Error('Erreur envoi fichier');
+  return `/${fbxFolder}/${filename}`;
+}
+
+async function uploadIndexFbx() {
+  const ok = await openSession();
+  if (!ok) return;
+  const data = JSON.stringify(receipts.map(r => ({ ...r, image: undefined })), null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const uploadRes = await api('/upload/', {
+    method: 'POST',
+    body: JSON.stringify({ dirname: b64Path(`/${fbxFolder}`), upload_name: 'index.json' })
+  });
+  if (!uploadRes.success) return;
+  const base = (fbxUrl || '').replace(/\/$/, '');
+  await fetch(`${base}/api/v6/upload/${uploadRes.result.id}/send`, {
+    method: 'POST',
+    headers: { 'X-Fbx-App-Auth': sessionToken },
+    body: blob
+  });
+}
+
+// ═══════════════════════════════════════
+//  SYNC
+// ═══════════════════════════════════════
+async function syncReceipt(receipt) {
+  if (!appToken) return;
+  setSync('syncing', 'Envoi vers la Freebox...');
+  try {
+    await ensureFolder();
+    if (receipt.image && !receipt.nasFile) {
+      const fn = `${receipt.date}_${receipt.place.replace(/[^a-z0-9]/gi, '_')}_${receipt.id}.jpg`;
+      receipt.nasFile = await uploadFileFbx(fn, receipt.image);
+      saveLocal();
+    }
+    await uploadIndexFbx();
+    setSync('ok', `Sauvegardé sur Freebox — /${fbxFolder}`);
+    render();
+  } catch (e) { setSync('error', 'Erreur : ' + e.message); }
+}
+
+async function syncAll() {
+  if (!appToken) return;
+  setSync('syncing', 'Synchronisation complète...');
+  try {
+    await ensureFolder();
+    for (const r of receipts) {
+      if (r.image && !r.nasFile) {
+        const fn = `${r.date}_${r.place.replace(/[^a-z0-9]/gi, '_')}_${r.id}.jpg`;
+        r.nasFile = await uploadFileFbx(fn, r.image);
+      }
+    }
+    saveLocal();
+    await uploadIndexFbx();
+    setSync('ok', `Tout synchronisé — ${receipts.length} reçu(s)`);
+    render();
+  } catch (e) { setSync('error', 'Erreur : ' + e.message); }
+}
+
+function setSync(state, txt) {
+  document.getElementById('sync-bar').classList.add('show');
+  document.getElementById('sync-dot').className = 'sync-dot ' + state;
+  document.getElementById('sync-text').textContent = txt;
+}
+
+// ═══════════════════════════════════════
+//  UI — BOUTON FREEBOX
+// ═══════════════════════════════════════
+function updBtn() {
+  const b = document.getElementById('fbx-btn');
+  if (appToken) {
+    b.className = 'fbx-btn connected';
+    b.innerHTML = '<span class="fbx-dot"></span> Freebox NAS';
+    setSync('ok', `Connecté — /${fbxFolder}`);
+  } else {
+    b.className = 'fbx-btn connect';
+    b.innerHTML = '📦 Freebox NAS';
+  }
+}
+
+function handleFbxBtn() {
+  if (appToken) {
+    if (confirm('Déconnecter la Freebox ?')) {
+      appToken = sessionToken = null;
+      localStorage.removeItem('fbx_app_token');
+      document.getElementById('sync-bar').classList.remove('show');
+      updBtn();
+    }
+  } else {
+    openSetup();
+  }
+}
+
+// ═══════════════════════════════════════
+//  SETUP MODAL
+// ═══════════════════════════════════════
+function openSetup() {
+  showStep(1);
+  document.getElementById('setup-modal').classList.add('open');
+}
+
+function closeSetup() {
+  if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+  document.getElementById('setup-modal').classList.remove('open');
+}
+
+function showStep(n) {
+  document.querySelectorAll('.setup-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+}
+
+async function startRegistration() {
+  const url = document.getElementById('fbx-url').value.trim().replace(/\/$/, '');
+  const folder = document.getElementById('fbx-folder').value.trim() || 'MesRecus';
+  if (!url) { alert('Veuillez entrer l\'adresse de votre Freebox'); return; }
+  fbxUrl = url;
+  fbxFolder = folder;
+  localStorage.setItem('fbx_url', fbxUrl);
+  localStorage.setItem('fbx_folder', fbxFolder);
+  showStep(2);
+  try {
+    const trackId = await registerApp();
+    await pollStatus(trackId);
+    showStep(3);
+    updBtn();
+    // Ouvrir une session de suite
+    await openSession();
+    await ensureFolder();
+    toast('Freebox connectée ✓');
+  } catch (e) {
+    showStep(1);
+    toast('Erreur : ' + e.message, true);
+  }
+}
+
+function cancelRegistration() {
+  if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+  showStep(1);
+}
+
+// ═══════════════════════════════════════
+//  IMAGE CAPTURE
+// ═══════════════════════════════════════
+document.getElementById('file-input').addEventListener('change', function(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      const s = Math.min(1, 1200 / img.width);
+      c.width = img.width * s; c.height = img.height * s;
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      curImg = c.toDataURL('image/jpeg', 0.75);
+      openAdd();
+    };
+    img.src = ev.target.result;
+  };
+  rd.readAsDataURL(f); this.value = '';
+});
+
+function openAdd() {
+  document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
+  ['f-amount', 'f-place', 'f-notes'].forEach(id => document.getElementById(id).value = '');
+  const img = document.getElementById('preview-img');
+  img.src = curImg || ''; img.style.display = curImg ? 'block' : 'none';
+  document.getElementById('add-modal').classList.add('open');
+}
+function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); curImg = null; }
+
+async function saveReceipt() {
+  const date = document.getElementById('f-date').value;
+  const amount = parseFloat(document.getElementById('f-amount').value);
+  const place = document.getElementById('f-place').value.trim();
+  const notes = document.getElementById('f-notes').value.trim();
+  if (!date) return alert('Date requise');
+  if (!amount || amount <= 0) return alert('Montant invalide');
+  if (!place) return alert('Lieu requis');
+  const rec = { id: Date.now().toString(), date, amount, place, notes, image: curImg, nasFile: null, createdAt: new Date().toISOString() };
+  receipts.unshift(rec); saveLocal(); closeAddModal(); render();
+  toast('Reçu enregistré ✓');
+  if (appToken) syncReceipt(rec);
+}
+
+// ═══════════════════════════════════════
+//  DETAIL
+// ═══════════════════════════════════════
+function openDetail(id) {
+  const r = receipts.find(x => x.id === id); if (!r) return;
+  const d = new Date(r.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  let h = r.image ? `<img src="${r.image}" class="detail-img" onclick="openFS('${id}')" title="Agrandir">` : `<div style="background:var(--cream);border-radius:10px;height:110px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;margin-bottom:0.9rem">🧾</div>`;
+  if (r.nasFile) h += `<div style="background:#fff0f0;color:var(--fbx);font-size:0.72rem;padding:5px 10px;border-radius:6px;margin-bottom:0.9rem;display:inline-block">📦 Sauvegardé sur Freebox : ${r.nasFile}</div>`;
+  h += `<div class="detail-amount-big">${r.amount.toFixed(2).replace('.', ',')} €</div>`;
+  h += `<div class="detail-row"><span class="detail-key">Lieu</span><span class="detail-val">${r.place}</span></div>`;
+  h += `<div class="detail-row"><span class="detail-key">Date</span><span class="detail-val">${d}</span></div>`;
+  if (r.notes) h += `<div class="detail-row"><span class="detail-key">Motif</span><span class="detail-val" style="text-align:right;max-width:60%">${r.notes}</span></div>`;
+  h += `<div class="detail-row"><span class="detail-key">Enregistré</span><span class="detail-val">${new Date(r.createdAt).toLocaleDateString('fr-FR')}</span></div>`;
+  if (r.image) h += `<button class="btn-export" style="margin-top:0.9rem;width:100%;justify-content:center" onclick="dlImg('${id}')">⬇ Télécharger</button>`;
+  h += `<button class="btn-danger" onclick="delReceipt('${id}')">🗑 Supprimer ce reçu</button>`;
+  document.getElementById('detail-content').innerHTML = h;
+  document.getElementById('detail-modal').classList.add('open');
+}
+function closeDetailModal() { document.getElementById('detail-modal').classList.remove('open'); }
+function delReceipt(id) {
+  if (!confirm('Supprimer ce reçu ?')) return;
+  receipts = receipts.filter(x => x.id !== id); saveLocal(); closeDetailModal(); render();
+  toast('Reçu supprimé');
+  if (appToken) uploadIndexFbx().catch(() => {});
+}
+function dlImg(id) {
+  const r = receipts.find(x => x.id === id); if (!r?.image) return;
+  const a = document.createElement('a'); a.href = r.image;
+  a.download = `recu_${r.date}_${r.place.replace(/\s+/g, '-')}.jpg`; a.click();
+}
+function openFS(id) {
+  const r = receipts.find(x => x.id === id); if (!r?.image) return;
+  document.getElementById('fullscreen-img').src = r.image;
+  document.getElementById('fullscreen').classList.add('open');
+}
+function closeFullscreen() { document.getElementById('fullscreen').classList.remove('open'); }
+
+// ═══════════════════════════════════════
+//  EXPORT CSV
+// ═══════════════════════════════════════
+function exportCSV() {
+  const f = getFiltered(); if (!f.length) return alert('Aucun reçu.');
+  let csv = 'Date;Lieu;Montant EUR;Motif;Chemin Freebox\n';
+  f.forEach(r => { csv += `${r.date};${r.place.replace(/;/g, ',')};${r.amount.toFixed(2)};${(r.notes||'').replace(/;/g,',')};${r.nasFile||''}\n`; });
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = `reçus_${selYear}.csv`; a.click(); URL.revokeObjectURL(url);
+  toast('CSV exporté ✓');
+}
+
+// ═══════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════
+function getFiltered() { return receipts.filter(r => r.date.startsWith(selYear.toString())); }
+function setYear(y) { selYear = y; render(); }
+
+function render() {
+  const years = [...new Set([...receipts.map(r => r.date.slice(0, 4)), new Date().getFullYear().toString()])].sort((a, b) => b - a);
+  document.getElementById('year-filters').innerHTML = years.map(y => `<button class="year-btn ${y == selYear ? 'active' : ''}" onclick="setYear(${y})">${y}</button>`).join('');
+  const f = getFiltered();
+  const tot = f.reduce((s, r) => s + r.amount, 0);
+  document.getElementById('stat-total').textContent = tot.toFixed(2).replace('.', ',') + ' €';
+  document.getElementById('stat-count').textContent = f.length;
+  document.getElementById('filter-count').textContent = `${f.length} reçu${f.length !== 1 ? 's' : ''} — ${tot.toFixed(2).replace('.', ',')} €`;
+  const c = document.getElementById('receipts-container');
+  if (!f.length) { c.innerHTML = `<div class="empty-state"><div class="empty-icon">🧾</div><div class="empty-title">Aucun reçu pour ${selYear}</div><div class="empty-text">Photographiez votre premier reçu.</div></div>`; return; }
+  const g = {};
+  f.forEach(r => { const k = r.date.slice(0, 7); (g[k] = g[k] || []).push(r); });
+  let html = '';
+  Object.keys(g).sort((a, b) => b.localeCompare(a)).forEach(k => {
+    const mrs = g[k]; const mt = mrs.reduce((s, r) => s + r.amount, 0);
+    const ml = new Date(k + '-01T12:00:00').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    html += `<div class="month-group"><div class="month-title"><span>${ml.charAt(0).toUpperCase() + ml.slice(1)}</span><span class="month-total">${mt.toFixed(2).replace('.', ',')} €</span></div><div class="receipts-grid">`;
+    mrs.forEach(r => {
+      const dl = new Date(r.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+      const img = r.image ? `<img class="receipt-img" src="${r.image}" loading="lazy">` : `<div class="receipt-no-img">🧾</div>`;
+      const nas = r.nasFile ? `<div class="receipt-nas">📦</div>` : '';
+      html += `<div class="receipt-card" onclick="openDetail('${r.id}')">${img}${nas}<div class="receipt-badge">✓</div><div class="receipt-body"><div class="receipt-place">${r.place}</div><div class="receipt-date">${dl}</div><div class="receipt-amount">${r.amount.toFixed(2).replace('.', ',')} €</div></div></div>`;
+    });
+    html += `</div></div>`;
+  });
+  c.innerHTML = html;
+}
+
+function toast(msg, err = false) {
+  const t = document.getElementById('toast'); t.textContent = msg;
+  t.className = 'toast' + (err ? ' error' : '') + ' show';
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSetup(); closeAddModal(); closeDetailModal(); closeFullscreen(); } });
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+loadLocal();
+render();
+updBtn();
+// Tentative de session silencieuse au démarrage
+if (appToken && fbxUrl) {
+  openSession().then(ok => { if (ok) setSync('ok', `Connecté — /${fbxFolder}`); });
+}
+</script>
+</body>
+</html>
