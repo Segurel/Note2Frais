@@ -605,11 +605,21 @@ textarea{resize:vertical;min-height:55px}
     document.getElementById("mo-crop").className = "mo on";
   }
 
+  // Calcule les 4 milieux de côtés [top, right, bottom, left]
+  function midHandles() {
+    var c = cropCorners;
+    return [
+      { x: (c[0].x+c[1].x)/2, y: (c[0].y+c[1].y)/2, side: 0 }, // haut
+      { x: (c[1].x+c[2].x)/2, y: (c[1].y+c[2].y)/2, side: 1 }, // droite
+      { x: (c[2].x+c[3].x)/2, y: (c[2].y+c[3].y)/2, side: 2 }, // bas
+      { x: (c[3].x+c[0].x)/2, y: (c[3].y+c[0].y)/2, side: 3 }  // gauche
+    ];
+  }
+
   function drawCrop() {
     if (!cropCanvas || !cropSrcImg) return;
     var W = cropCanvas.width, H = cropCanvas.height;
     cropCtx.clearRect(0, 0, W, H);
-    // Image
     cropCtx.drawImage(cropSrcImg, 0, 0, W, H);
     // Fond sombre hors zone
     cropCtx.save();
@@ -621,7 +631,7 @@ textarea{resize:vertical;min-height:55px}
     cropCtx.fillStyle = "rgba(0,0,0,0.45)";
     cropCtx.fill("evenodd");
     cropCtx.restore();
-    // Contour de sélection
+    // Contour
     cropCtx.beginPath();
     cropCtx.moveTo(cropCorners[0].x, cropCorners[0].y);
     cropCorners.forEach(function(c){ cropCtx.lineTo(c.x, c.y); });
@@ -631,7 +641,7 @@ textarea{resize:vertical;min-height:55px}
     cropCtx.setLineDash([8, 4]);
     cropCtx.stroke();
     cropCtx.setLineDash([]);
-    // Poignées
+    // Poignées coins — cercle blanc plein
     cropCorners.forEach(function(c) {
       cropCtx.beginPath();
       cropCtx.arc(c.x, c.y, 10, 0, Math.PI*2);
@@ -639,6 +649,17 @@ textarea{resize:vertical;min-height:55px}
       cropCtx.fill();
       cropCtx.strokeStyle = "#c8522a";
       cropCtx.lineWidth = 2.5;
+      cropCtx.stroke();
+    });
+    // Poignées milieu de côté — carré arrondi
+    midHandles().forEach(function(m) {
+      var s = 9;
+      cropCtx.beginPath();
+      cropCtx.roundRect(m.x - s, m.y - s, s*2, s*2, 4);
+      cropCtx.fillStyle = "#fff";
+      cropCtx.fill();
+      cropCtx.strokeStyle = "#c8522a";
+      cropCtx.lineWidth = 2;
       cropCtx.stroke();
     });
   }
@@ -692,33 +713,68 @@ textarea{resize:vertical;min-height:55px}
   }
 
   function setupCropEvents() {
-    // Retirer les anciens listeners en remplaçant le canvas
     var old = cropCanvas;
     var neo = old.cloneNode(true);
     old.parentNode.replaceChild(neo, old);
     cropCanvas = neo;
     cropCtx = neo.getContext("2d");
-    drawCrop(); // redessiner sur le nouveau canvas
+    drawCrop();
+
+    var dragIdx = -1;    // 0-3 = coin, 4-7 = milieu de côté
+    var dragLast = null;
 
     function onStart(e) {
       var pos = canvasPos(e);
-      cropDragIdx = -1;
+      dragIdx = -1;
       var minD = Infinity;
-      cropCorners.forEach(function(c,i){
-        var d = Math.hypot(c.x-pos.x, c.y-pos.y);
-        if (d < minD) { minD=d; cropDragIdx=i; }
+
+      // Tester les coins (priorité)
+      cropCorners.forEach(function(c, i) {
+        var d = Math.hypot(c.x - pos.x, c.y - pos.y);
+        if (d < minD) { minD = d; dragIdx = i; }
       });
-      if (minD > HANDLE_R * 2) { cropDragIdx = -1; return; }
+
+      // Tester les milieux de côté
+      midHandles().forEach(function(m, i) {
+        var d = Math.hypot(m.x - pos.x, m.y - pos.y);
+        if (d < minD) { minD = d; dragIdx = 4 + i; }
+      });
+
+      if (minD > HANDLE_R * 2.5) { dragIdx = -1; return; }
+      dragLast = pos;
       e.preventDefault();
     }
+
     function onMove(e) {
-      if (cropDragIdx === -1) return;
+      if (dragIdx === -1) return;
       e.preventDefault();
       var pos = canvasPos(e);
-      cropCorners[cropDragIdx] = pos;
+
+      if (dragIdx < 4) {
+        // Déplacement d'un coin
+        cropCorners[dragIdx] = pos;
+      } else {
+        // Déplacement d'un côté entier : translate les 2 coins du bord
+        var side = dragIdx - 4;
+        var dx = pos.x - dragLast.x;
+        var dy = pos.y - dragLast.y;
+        // Côté 0=haut(0,1), 1=droite(1,2), 2=bas(2,3), 3=gauche(3,0)
+        var pairs = [[0,1],[1,2],[2,3],[3,0]];
+        var p = pairs[side];
+        cropCorners[p[0]] = {
+          x: Math.max(0, Math.min(cropCanvas.width,  cropCorners[p[0]].x + dx)),
+          y: Math.max(0, Math.min(cropCanvas.height, cropCorners[p[0]].y + dy))
+        };
+        cropCorners[p[1]] = {
+          x: Math.max(0, Math.min(cropCanvas.width,  cropCorners[p[1]].x + dx)),
+          y: Math.max(0, Math.min(cropCanvas.height, cropCorners[p[1]].y + dy))
+        };
+      }
+      dragLast = pos;
       drawCrop();
     }
-    function onEnd() { cropDragIdx = -1; }
+
+    function onEnd() { dragIdx = -1; dragLast = null; }
 
     cropCanvas.addEventListener("mousedown",  onStart);
     cropCanvas.addEventListener("touchstart", onStart, {passive:false});
@@ -729,22 +785,37 @@ textarea{resize:vertical;min-height:55px}
   }
 
   window.applyCrop = function() {
-    var W = cropCanvas.width, H = cropCanvas.height;
-    var pts = cropCorners; // déjà en pixels canvas
-    var wTop = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
-    var wBot = Math.hypot(pts[2].x-pts[3].x, pts[2].y-pts[3].y);
+    // Travailler sur l'image SOURCE pleine résolution, pas sur le canvas d'affichage
+    var srcW = cropSrcImg.naturalWidth  || cropSrcImg.width;
+    var srcH = cropSrcImg.naturalHeight || cropSrcImg.height;
+    var dispW = cropCanvas.width, dispH = cropCanvas.height;
+
+    // Convertir les coins du canvas d'affichage → coordonnées pleine résolution
+    var scaleX = srcW / dispW, scaleY = srcH / dispH;
+    var pts = cropCorners.map(function(c) {
+      return { x: c.x * scaleX, y: c.y * scaleY };
+    });
+
+    var wTop  = Math.hypot(pts[1].x-pts[0].x, pts[1].y-pts[0].y);
+    var wBot  = Math.hypot(pts[2].x-pts[3].x, pts[2].y-pts[3].y);
     var hLeft = Math.hypot(pts[3].x-pts[0].x, pts[3].y-pts[0].y);
     var hRight= Math.hypot(pts[2].x-pts[1].x, pts[2].y-pts[1].y);
     var dW = Math.round(Math.max(wTop, wBot));
     var dH = Math.round(Math.max(hLeft, hRight));
 
+    // Plafonner à 2400px sur le grand côté pour ne pas exploser le localStorage
+    var maxDim = 2400;
+    var outScale = Math.min(1, maxDim / Math.max(dW, dH));
+    dW = Math.round(dW * outScale);
+    dH = Math.round(dH * outScale);
+
     if (window.cvReady && window.cv && cv.imread) {
       try {
-        // Redessiner l'image propre (sans overlay) pour imread
-        var tmpC = document.createElement("canvas");
-        tmpC.width = W; tmpC.height = H;
-        tmpC.getContext("2d").drawImage(cropSrcImg, 0, 0, W, H);
-        var src = cv.imread(tmpC);
+        // Canvas pleine résolution pour OpenCV
+        var fullC = document.createElement("canvas");
+        fullC.width = srcW; fullC.height = srcH;
+        fullC.getContext("2d").drawImage(cropSrcImg, 0, 0, srcW, srcH);
+        var src = cv.imread(fullC);
         var srcPts = cv.matFromArray(4,1,cv.CV_32FC2,[pts[0].x,pts[0].y,pts[1].x,pts[1].y,pts[2].x,pts[2].y,pts[3].x,pts[3].y]);
         var dstPts = cv.matFromArray(4,1,cv.CV_32FC2,[0,0,dW,0,dW,dH,0,dH]);
         var M = cv.getPerspectiveTransform(srcPts, dstPts);
@@ -753,29 +824,36 @@ textarea{resize:vertical;min-height:55px}
         var out = document.createElement("canvas");
         out.width = dW; out.height = dH;
         cv.imshow(out, dst);
-        curImg = out.toDataURL("image/jpeg", 0.85);
+        curImg = out.toDataURL("image/jpeg", 0.92);
         [src,srcPts,dstPts,M,dst].forEach(function(m){try{m.delete();}catch(e){}});
-      } catch(e) { fallbackCrop(pts); }
-    } else { fallbackCrop(pts); }
+      } catch(e) { fallbackCrop(pts, dW, dH, srcW, srcH); }
+    } else { fallbackCrop(pts, dW, dH, srcW, srcH); }
     closeCropAndOpen();
   };
 
-  function fallbackCrop(pts) {
+  function fallbackCrop(pts, dW, dH, srcW, srcH) {
+    // Recadrage bounding box sur l'image pleine résolution
     var minX = Math.min(pts[0].x,pts[1].x,pts[2].x,pts[3].x);
     var minY = Math.min(pts[0].y,pts[1].y,pts[2].y,pts[3].y);
     var maxX = Math.max(pts[0].x,pts[1].x,pts[2].x,pts[3].x);
     var maxY = Math.max(pts[0].y,pts[1].y,pts[2].y,pts[3].y);
     var out = document.createElement("canvas");
-    out.width = Math.round(maxX-minX); out.height = Math.round(maxY-minY);
-    out.getContext("2d").drawImage(cropSrcImg, minX, minY, out.width, out.height, 0, 0, out.width, out.height);
-    curImg = out.toDataURL("image/jpeg", 0.85);
+    out.width = dW || Math.round(maxX-minX);
+    out.height = dH || Math.round(maxY-minY);
+    out.getContext("2d").drawImage(cropSrcImg, minX, minY, maxX-minX, maxY-minY, 0, 0, out.width, out.height);
+    curImg = out.toDataURL("image/jpeg", 0.92);
   }
 
   window.skipCrop = function() {
+    // Image complète pleine résolution, plafonnée à 2400px
+    var srcW = cropSrcImg.naturalWidth  || cropSrcImg.width;
+    var srcH = cropSrcImg.naturalHeight || cropSrcImg.height;
+    var maxDim = 2400;
+    var s = Math.min(1, maxDim / Math.max(srcW, srcH));
     var out = document.createElement("canvas");
-    out.width = cropCanvas.width; out.height = cropCanvas.height;
+    out.width = Math.round(srcW * s); out.height = Math.round(srcH * s);
     out.getContext("2d").drawImage(cropSrcImg, 0, 0, out.width, out.height);
-    curImg = out.toDataURL("image/jpeg", 0.82);
+    curImg = out.toDataURL("image/jpeg", 0.92);
     closeCropAndOpen();
   };
 
