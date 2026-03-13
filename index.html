@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>MesRecus</title>
+<title>Note2Frais</title>
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#1a1612">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MesRecus">
+<meta name="apple-mobile-web-app-title" content="Note2Frais">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
 <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#1a1612;--paper:#f5f0e8;--cream:#ede8dc;--accent:#c8522a;--gold:#b89a4e;--muted:#7a7268;--success:#3a7d5a;--border:#d4cfc4;--fbx:#e2001a;--sh:0 2px 16px rgba(26,22,18,.1);--shlg:0 8px 40px rgba(26,22,18,.15)}
+:root{--ink:#1a1612;--paper:#f5f0e8;--cream:#ede8dc;--accent:#c8522a;--gold:#b89a4e;--muted:#7a7268;--success:#3a7d5a;--border:#d4cfc4;--gdrive:#1a73e8;--sh:0 2px 16px rgba(26,22,18,.1);--shlg:0 8px 40px rgba(26,22,18,.15)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"DM Sans",sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden}
 header{background:var(--ink);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3);gap:1rem;flex-wrap:wrap}
@@ -25,11 +25,12 @@ header{background:var(--ink);padding:1.2rem 2rem;display:flex;align-items:center
 .stat{text-align:right}
 .sv{font-family:"DM Serif Display",serif;font-size:1.2rem;color:var(--gold);display:block}
 .sl{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:#a09880}
-.fbxbtn{display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border-radius:8px;font-family:"DM Sans",sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
-.fbxbtn.co{background:var(--fbx);color:#fff}
-.fbxbtn.co:hover{background:#b5001a}
-.fbxbtn.cd{background:rgba(255,255,255,.1);color:#ffaaaa;border:1px solid rgba(255,255,255,.15)}
-.fbxdot{width:7px;height:7px;border-radius:50%;background:#5cb85c;flex-shrink:0}
+.gdrive-btn{display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border-radius:8px;font-family:"DM Sans",sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
+.gdrive-btn.co{background:var(--gdrive);color:#fff}
+.gdrive-btn.co:hover{background:#1557b0}
+.gdrive-btn.cd{background:rgba(255,255,255,.1);color:#aac8ff;border:1px solid rgba(255,255,255,.15)}
+.gdrive-btn.cd:hover{background:rgba(255,255,255,.18)}
+.gdot{width:7px;height:7px;border-radius:50%;background:#5cb85c;flex-shrink:0}
 .syncbar{display:none;align-items:center;gap:.6rem;padding:.6rem 1rem;background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-bottom:1.2rem;font-size:.78rem;color:var(--muted)}
 .syncbar.on{display:flex}
 .sdot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .3s}
@@ -40,8 +41,6 @@ header{background:var(--ink);padding:1.2rem 2rem;display:flex;align-items:center
 .stext{flex:1}
 .sbtn{padding:.3rem .7rem;background:var(--ink);color:var(--paper);border:none;border-radius:6px;font-size:.72rem;cursor:pointer}
 .sbtn:hover{background:var(--accent)}
-.iosbanner{display:none;background:#fff3cd;border:1.5px solid #ffc107;border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;font-size:.82rem;color:#856404;line-height:1.6}
-.iosbanner.on{display:block}
 main{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
 .capzone{background:var(--ink);border-radius:16px;padding:2.2rem;text-align:center;cursor:pointer;transition:all .3s;margin-bottom:1.5rem;position:relative;overflow:hidden}
 .capzone::before{content:"";position:absolute;inset:2px;border:2px dashed #3a3530;border-radius:14px;pointer-events:none}
@@ -71,13 +70,13 @@ main{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
 .rcard{background:#fff;border-radius:12px;overflow:hidden;border:1.5px solid var(--border);cursor:pointer;transition:all .2s;position:relative}
 .rcard:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--sh)}
 .rimg{width:100%;height:120px;object-fit:cover;display:block;background:var(--cream)}
-.rnimg{width:100%;height:120px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:var(--border)}
+.rnimg{width:100%;height:120px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:var(--border)}
 .rbody{padding:.6rem .85rem}
 .rplace{font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rdate{font-size:.68rem;color:var(--muted);margin-top:.1rem}
 .ramt{font-family:"DM Serif Display",serif;font-size:1rem;color:var(--accent);margin-top:.15rem}
-.rbadge{position:absolute;top:7px;right:7px;background:var(--ink);color:var(--gold);font-size:.58rem;letter-spacing:.1em;padding:2px 6px;border-radius:10px;text-transform:uppercase}
-.rnas{position:absolute;top:7px;left:7px;background:var(--fbx);color:#fff;font-size:.58rem;padding:2px 6px;border-radius:10px}
+.rbadge{position:absolute;top:7px;right:7px;background:var(--ink);color:var(--gold);font-size:.58rem;letter-spacing:.1em;padding:2px 6px;border-radius:10px}
+.rdrive{position:absolute;top:7px;left:7px;background:var(--gdrive);color:#fff;font-size:.58rem;padding:2px 6px;border-radius:10px}
 .mo{position:fixed;inset:0;background:rgba(20,16,12,.85);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .3s}
 .mo.on{opacity:1;pointer-events:all}
 .mbox{background:var(--paper);border-radius:20px;padding:1.8rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;transform:translateY(20px);transition:transform .3s;box-shadow:var(--shlg)}
@@ -86,20 +85,10 @@ main{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
 .mtit{font-family:"DM Serif Display",serif;font-size:1.3rem}
 .xcbtn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--muted);transition:all .2s}
 .xcbtn:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.step{display:none}
-.step.on{display:block}
-.stit{font-family:"DM Serif Display",serif;font-size:1.1rem;margin-bottom:.6rem}
-.sdesc{font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:1rem}
-.sdesc strong{color:var(--ink)}
-.sdesc code{background:var(--cream);padding:2px 6px;border-radius:4px;font-size:.78rem}
-.wbox{background:var(--cream);border-radius:12px;padding:1.2rem;text-align:center;margin:1rem 0}
-.wico{font-size:2rem;margin-bottom:.5rem}
+.wbox{background:var(--cream);border-radius:12px;padding:1.5rem;text-align:center;margin:1rem 0}
+.wico{font-size:2.5rem;margin-bottom:.5rem}
 .wtxt{font-size:.82rem;color:var(--muted);line-height:1.5}
 .wtxt strong{color:var(--ink)}
-.pdots{display:flex;gap:6px;justify-content:center;margin-top:.75rem}
-.pd{width:8px;height:8px;border-radius:50%;background:var(--border)}
-.pd.on{background:var(--accent);animation:dp 1s infinite}
-@keyframes dp{0%,100%{opacity:1}50%{opacity:.3}}
 .fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.75rem}
 label{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
 input,textarea{padding:.6rem .85rem;border:1.5px solid var(--border);border-radius:8px;font-family:"DM Sans",sans-serif;font-size:.88rem;background:#fff;color:var(--ink);transition:border-color .2s;outline:none}
@@ -109,6 +98,8 @@ textarea{resize:vertical;min-height:55px}
 .frow.full{grid-template-columns:1fr}
 .bp{width:100%;padding:.85rem;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:"DM Serif Display",serif;font-size:1.05rem;cursor:pointer;transition:all .2s;margin-top:.5rem}
 .bp:hover{background:#a8421a}
+.bgdrive{width:100%;padding:.85rem;background:var(--gdrive);color:#fff;border:none;border-radius:10px;font-family:"DM Serif Display",serif;font-size:1.05rem;cursor:pointer;transition:all .2s;margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:.6rem}
+.bgdrive:hover{background:#1557b0}
 .bs{width:100%;padding:.75rem;background:transparent;color:var(--ink);border:1.5px solid var(--border);border-radius:10px;font-family:"DM Sans",sans-serif;font-size:.88rem;cursor:pointer;transition:all .2s;margin-top:.5rem}
 .bs:hover{border-color:var(--ink)}
 .bd{width:100%;padding:.65rem;background:transparent;color:#c0392b;border:1.5px solid #c0392b;border-radius:8px;font-family:"DM Sans",sans-serif;font-size:.82rem;cursor:pointer;margin-top:.9rem;transition:all .2s}
@@ -117,7 +108,7 @@ textarea{resize:vertical;min-height:55px}
 .dimg{width:100%;max-height:280px;object-fit:contain;border-radius:10px;background:var(--cream);border:1.5px solid var(--border);margin-bottom:.9rem;cursor:pointer}
 .drow{display:flex;justify-content:space-between;align-items:baseline;padding:.55rem 0;border-bottom:1px solid var(--cream)}
 .dk{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
-.dv{font-weight:500;font-size:.88rem}
+.dv{font-weight:500;font-size:.88rem;text-align:right;max-width:65%}
 .damt{font-family:"DM Serif Display",serif;font-size:1.9rem;color:var(--accent);text-align:center;margin:.9rem 0}
 .fso{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;cursor:zoom-out}
 .fso.on{opacity:1;pointer-events:all}
@@ -136,41 +127,46 @@ textarea{resize:vertical;min-height:55px}
 
 <header>
   <div>
-    <div class="logo-title">MesRecus</div>
-    <div class="logo-sub">Frais de repas</div>
+    <div class="logo-title">Note2Frais</div>
+    <div class="logo-sub">Frais de repas &middot; Impots</div>
   </div>
   <div class="hright">
     <div class="hstats">
       <div class="stat"><span class="sv" id="stat-total">0,00 EUR</span><span class="sl">Total</span></div>
       <div class="stat"><span class="sv" id="stat-count">0</span><span class="sl">Recus</span></div>
     </div>
-    <button class="fbxbtn co" id="fbxbtn" onclick="handleFbx()">Freebox NAS</button>
+    <button class="gdrive-btn co" id="gdrive-btn" onclick="handleDriveBtn()">&#9654; Google Drive</button>
   </div>
 </header>
 
 <main>
-  <div class="iosbanner" id="iosbanner">
-    <strong>iPhone (mode app)</strong> - Pour connecter la Freebox, appuyez sur le bouton Freebox NAS : Safari s'ouvrira pour l'autorisation, puis revenez ici.
-  </div>
   <div class="syncbar" id="syncbar">
     <div class="sdot" id="sdot"></div>
-    <span class="stext" id="stxt">Freebox connectee</span>
+    <span class="stext" id="stxt">Google Drive connecte</span>
     <button class="sbtn" onclick="syncAll()">Synchroniser</button>
   </div>
+
   <div class="capzone" onclick="document.getElementById('fi').click()">
-    <span class="capicon">Appareil photo</span>
+    <span class="capicon">&#128247;</span>
     <div class="captxt">Photographier un recu</div>
-    <div class="capsub">Photo ou import - Sauvegarde sur disque USB Freebox</div>
+    <div class="capsub">Photo ou import &middot; Sauvegarde automatique sur Google Drive</div>
     <input type="file" id="fi" accept="image/*" capture="environment">
   </div>
+
   <div class="ybar">
     <span class="ylbl">Annee :</span>
     <div id="yfilters"></div>
   </div>
+
   <div class="exbar">
-    <div class="exinfo"><strong>Justificatif fiscal</strong> - Photos sur votre disque Freebox dans <code>MesRecus/</code></div>
-    <button class="exbtn" onclick="exportCSV()">Export CSV</button>
+    <div class="exinfo">
+      <strong>Justificatif fiscal</strong> &mdash; Photos sauvegardees dans
+      <code style="background:var(--cream);padding:1px 5px;border-radius:3px;font-size:.72rem">Note2Frais/</code>
+      sur Google Drive
+    </div>
+    <button class="exbtn" onclick="exportCSV()">&#8595; Export CSV</button>
   </div>
+
   <div class="sech">
     <span class="setit">Mes recus</span>
     <span class="secnt" id="fcnt"></span>
@@ -178,54 +174,32 @@ textarea{resize:vertical;min-height:55px}
   <div id="rcont"></div>
 </main>
 
-<!-- SETUP -->
-<div class="mo" id="mo-setup">
+<!-- MODAL GOOGLE DRIVE -->
+<div class="mo" id="mo-drive">
   <div class="mbox">
-    <div class="mhd"><span class="mtit">Connexion Freebox</span><button class="xcbtn" onclick="closeSetup()">X</button></div>
-    <div class="step on" id="s1">
-      <div class="stit">Adresse de votre Freebox</div>
-      <div class="sdesc">
-        Activez l'acces distant sur mafreebox.freebox.fr puis entrez l'adresse fournie.<br>
-        Exemple : <code>https://xxxxxxxx.fbxos.fr</code>
+    <div class="mhd">
+      <span class="mtit">Google Drive</span>
+      <button class="xcbtn" onclick="closeDriveModal()">&#10005;</button>
+    </div>
+    <div class="wbox">
+      <div class="wico">&#9729;</div>
+      <div class="wtxt">
+        Connectez votre Google Drive pour sauvegarder automatiquement vos photos de recus.<br><br>
+        Un dossier <strong>Note2Frais/</strong> sera cree sur votre Drive.
       </div>
-      <div class="fg"><label>Adresse Freebox</label><input type="url" id="inp-url" placeholder="https://xxxxxxxx.fbxos.fr" autocorrect="off" autocapitalize="none" spellcheck="false"></div>
-      <div class="fg"><label>Dossier (disque USB)</label><input type="text" id="inp-folder" value="MesRecus"></div>
-      <button class="bp" onclick="s1next()">Continuer</button>
     </div>
-    <div class="step" id="s-ios">
-      <div class="stit">Autorisation via Safari</div>
-      <div class="sdesc">Sur iPhone en mode app, l'autorisation doit se faire dans Safari.<br>Appuyez ci-dessous, autorisez la Freebox dans Safari, puis revenez sur l'app.</div>
-      <div class="wbox"><div class="wico">Safari</div><div class="wtxt">L'autorisation se fait dans <strong>Safari</strong>, pas dans la PWA.</div></div>
-      <button class="bp" onclick="openSafari()">Ouvrir dans Safari</button>
-      <button class="bs" onclick="showStep('s1')">Retour</button>
-    </div>
-    <div class="step" id="s2">
-      <div class="stit">Autoriser sur la Freebox</div>
-      <div class="sdesc">Une notification apparait sur votre Freebox ou dans mafreebox.freebox.fr. Appuyez sur Autoriser.</div>
-      <div class="wbox">
-        <div class="wico">TV</div>
-        <div class="wtxt">En attente de votre autorisation sur la <strong>Freebox Pop</strong>...</div>
-        <div class="pdots">
-          <div class="pd on" id="pd0"></div>
-          <div class="pd" id="pd1"></div>
-          <div class="pd" id="pd2"></div>
-        </div>
-      </div>
-      <button class="bs" onclick="cancelAuth()">Annuler</button>
-    </div>
-    <div class="step" id="s3">
-      <div class="stit">Freebox connectee !</div>
-      <div class="sdesc">Vos recus seront sauvegardes sur votre disque USB Freebox.</div>
-      <div class="wbox" style="background:#eafbf0"><div class="wico">OK</div><div class="wtxt" style="color:#2a6045">Connexion etablie - token sauvegarde.</div></div>
-      <button class="bp" onclick="closeSetup()">C'est parti !</button>
-    </div>
+    <button class="bgdrive" onclick="connectDrive()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Se connecter avec Google
+    </button>
+    <button class="bs" onclick="closeDriveModal()">Annuler</button>
   </div>
 </div>
 
-<!-- AJOUT -->
+<!-- MODAL AJOUT -->
 <div class="mo" id="mo-add">
   <div class="mbox">
-    <div class="mhd"><span class="mtit">Nouveau recu</span><button class="xcbtn" onclick="closeAdd()">X</button></div>
+    <div class="mhd"><span class="mtit">Nouveau recu</span><button class="xcbtn" onclick="closeAdd()">&#10005;</button></div>
     <img id="previmg" class="previmg" src="" alt="" style="display:none">
     <div class="frow">
       <div class="fg"><label>Date</label><input type="date" id="f-date"></div>
@@ -235,16 +209,16 @@ textarea{resize:vertical;min-height:55px}
       <div class="fg"><label>Lieu / Restaurant</label><input type="text" id="f-place" placeholder="Brasserie du Marche"></div>
     </div>
     <div class="frow full">
-      <div class="fg"><label>Motif (optionnel)</label><textarea id="f-notes" placeholder="Dejeuner de travail..."></textarea></div>
+      <div class="fg"><label>Motif professionnel (optionnel)</label><textarea id="f-notes" placeholder="Dejeuner de travail..."></textarea></div>
     </div>
     <button class="bp" onclick="saveRec()">Enregistrer</button>
   </div>
 </div>
 
-<!-- DETAIL -->
+<!-- MODAL DETAIL -->
 <div class="mo" id="mo-det">
   <div class="mbox">
-    <div class="mhd"><span class="mtit">Detail du recu</span><button class="xcbtn" onclick="closeDet()">X</button></div>
+    <div class="mhd"><span class="mtit">Detail du recu</span><button class="xcbtn" onclick="closeDet()">&#10005;</button></div>
     <div id="detcont"></div>
   </div>
 </div>
@@ -254,567 +228,377 @@ textarea{resize:vertical;min-height:55px}
 
 <script>
 (function() {
-  // ==== CONSTANTES ====
-  var SK = 'mesrecus_v3';
-  var APPID = 'fr.mesrecus.webapp';
-  var APPNAME = 'MesRecus';
-  var APPVER = '1.0.0';
-  var DEVNAME = 'Navigateur';
+  var CLIENT_ID = "695646904885-l8e2ptes4kmrrobt1e0rjppt3cvvhgjm.apps.googleusercontent.com";
+  var SCOPES = "https://www.googleapis.com/auth/drive.file";
+  var FOLDER_NAME = "Note2Frais";
+  var SK = "note2frais_v1";
 
-  // ==== ETAT ====
   var receipts = [];
   var selYear = new Date().getFullYear();
   var curImg = null;
-  var fbxBase = null;
-  var fbxFolder = 'MesRecus';
-  var appToken = null;
-  var sessToken = null;
-  var sessExp = 0;
-  var pollTmr = null;
+  var accessToken = null;
+  var tokenExpiry = 0;
+  var folderId = null;
 
-  // ==== STORAGE ====
+  // ---- STORAGE ----
   function loadLocal() {
-    try {
-      var raw = localStorage.getItem(SK);
-      receipts = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(receipts)) receipts = [];
-    } catch(e) {
-      receipts = [];
-      try { localStorage.removeItem(SK); } catch(e2) {}
+    try { receipts = JSON.parse(localStorage.getItem(SK)) || []; if (!Array.isArray(receipts)) receipts = []; } catch(e) { receipts = []; }
+    try { accessToken = localStorage.getItem("gd_token") || null; } catch(e) {}
+    try { tokenExpiry = parseInt(localStorage.getItem("gd_expiry") || "0"); } catch(e) {}
+    try { folderId = localStorage.getItem("gd_folder_id") || null; } catch(e) {}
+  }
+  function saveLocal() { try { localStorage.setItem(SK, JSON.stringify(receipts)); } catch(e) {} }
+  function saveToken(token, expiresIn) {
+    accessToken = token;
+    tokenExpiry = Date.now() + (expiresIn - 60) * 1000;
+    try { localStorage.setItem("gd_token", token); localStorage.setItem("gd_expiry", String(tokenExpiry)); } catch(e) {}
+  }
+  function isTokenValid() { return accessToken && Date.now() < tokenExpiry; }
+
+  // ---- GOOGLE OAUTH (popup) ----
+  function connectDrive() {
+    var params = [
+      "client_id=" + encodeURIComponent(CLIENT_ID),
+      "redirect_uri=" + encodeURIComponent(https://segurel.github.io/Note2Frais/),
+      "response_type=token",
+      "scope=" + encodeURIComponent(SCOPES),
+      "prompt=select_account"
+    ].join("&");
+    var url = "https://accounts.google.com/o/oauth2/v2/auth?" + params;
+    // Ouvrir popup
+    var w = 500, h = 600;
+    var left = (screen.width - w) / 2;
+    var top = (screen.height - h) / 2;
+    var popup = window.open(url, "gdrive_auth", "width=" + w + ",height=" + h + ",left=" + left + ",top=" + top);
+    if (!popup) {
+      // Sur iOS PWA, pas de popup -> redirect
+      sessionStorage.setItem("gd_return", "1");
+      window.location.href = url;
+      return;
     }
-    try { fbxBase = localStorage.getItem('fbx_base') || null; } catch(e) {}
-    try { fbxFolder = localStorage.getItem('fbx_folder') || 'MesRecus'; } catch(e) {}
-    try { appToken = localStorage.getItem('fbx_app_token') || null; } catch(e) {}
+    // Surveiller le retour du popup
+    var timer = setInterval(function() {
+      try {
+        if (!popup || popup.closed) { clearInterval(timer); return; }
+        var hash = popup.location.hash;
+        if (hash && hash.indexOf("access_token") !== -1) {
+          clearInterval(timer);
+          popup.close();
+          handleTokenHash(hash);
+        }
+      } catch(e) { /* cross-origin, attendre */ }
+    }, 500);
   }
 
-  function saveLocal() {
-    try { localStorage.setItem(SK, JSON.stringify(receipts)); } catch(e) {}
-  }
-
-  // ==== DETECTION iOS PWA ====
-  function isPwa() { return window.navigator.standalone === true; }
-
-  // ==== API FREEBOX ====
-  function fbxReq(path, opts) {
-    var base = (fbxBase || '').replace(/\/$/, '');
-    var headers = { 'Content-Type': 'application/json' };
-    if (sessToken) headers['X-Fbx-App-Auth'] = sessToken;
-    if (opts && opts.headers) {
-      Object.keys(opts.headers).forEach(function(k) { headers[k] = opts.headers[k]; });
-    }
-    var fetchOpts = { method: 'GET' };
-    if (opts) {
-      if (opts.method) fetchOpts.method = opts.method;
-      if (opts.body) fetchOpts.body = opts.body;
-    }
-    fetchOpts.headers = headers;
-    return fetch(base + '/api/v6' + path, fetchOpts)
-      .then(function(r) { return r.json(); });
-  }
-
-  function hmacSha1(key, msg) {
-    var enc = new TextEncoder();
-    return crypto.subtle.importKey('raw', enc.encode(key), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign'])
-      .then(function(k) { return crypto.subtle.sign('HMAC', k, enc.encode(msg)); })
-      .then(function(sig) {
-        return Array.from(new Uint8Array(sig))
-          .map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-      });
-  }
-
-  function registerApp() {
-    return fbxReq('/login/authorize/', {
-      method: 'POST',
-      body: JSON.stringify({ app_id: APPID, app_name: APPNAME, app_version: APPVER, device_name: DEVNAME })
-    }).then(function(res) {
-      if (!res.success) throw new Error(res.msg || 'Echec autorisation');
-      appToken = res.result.app_token;
-      try { localStorage.setItem('fbx_app_token', appToken); } catch(e) {}
-      return res.result.track_id;
+  function handleTokenHash(hash) {
+    var params = {};
+    hash.replace(/^#/, "").split("&").forEach(function(p) {
+      var kv = p.split("="); params[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1] || "");
     });
+    if (params.access_token) {
+      saveToken(params.access_token, parseInt(params.expires_in || "3600"));
+      closeDriveModal();
+      updateBtn();
+      toast("Google Drive connecte !");
+      ensureFolder().then(function() { syncAll(); });
+    }
   }
 
-  function pollAuth(trackId) {
-    return new Promise(function(resolve, reject) {
-      var idx = 0;
-      pollTmr = setInterval(function() {
-        fbxReq('/login/authorize/' + trackId).then(function(res) {
-          var status = res.result && res.result.status;
-          idx = (idx + 1) % 3;
-          for (var i = 0; i < 3; i++) {
-            var d = document.getElementById('pd' + i);
-            if (d) d.className = 'pd' + (i === idx ? ' on' : '');
-          }
-          if (status === 'granted') { clearInterval(pollTmr); pollTmr = null; resolve(); }
-          else if (status === 'denied' || status === 'timeout') {
-            clearInterval(pollTmr); pollTmr = null;
-            reject(new Error('Autorisation: ' + status));
-          }
-        }).catch(function(e) { clearInterval(pollTmr); pollTmr = null; reject(e); });
-      }, 2000);
-    });
+  // Gerer le retour apres redirect (iOS PWA)
+  function handleRedirectReturn() {
+    var hash = window.location.hash;
+    if (hash && hash.indexOf("access_token") !== -1) {
+      history.replaceState({}, document.title, window.location.pathname);
+      handleTokenHash(hash);
+    }
   }
 
-  function openSession() {
-    if (sessToken && Date.now() < sessExp) return Promise.resolve(true);
-    if (!appToken || !fbxBase) return Promise.resolve(false);
-    return fbxReq('/login/').then(function(r) {
-      if (!r.success) return false;
-      return hmacSha1(appToken, r.result.challenge).then(function(pwd) {
-        return fbxReq('/login/session/', {
-          method: 'POST',
-          body: JSON.stringify({ app_id: APPID, app_version: APPVER, password: pwd })
-        });
-      }).then(function(s) {
-        if (!s.success) return false;
-        sessToken = s.result.session_token;
-        sessExp = Date.now() + 55 * 60 * 1000;
-        return true;
-      });
-    }).catch(function() { return false; });
+  // ---- API GOOGLE DRIVE ----
+  function driveReq(path, opts) {
+    var headers = { "Authorization": "Bearer " + accessToken };
+    if (opts && opts.json) { headers["Content-Type"] = "application/json"; }
+    var fetchOpts = { method: (opts && opts.method) || "GET", headers: headers };
+    if (opts && opts.body) fetchOpts.body = opts.body;
+    return fetch("https://www.googleapis.com/drive/v3" + path, fetchOpts).then(function(r) { return r.json(); });
   }
-
-  function b64p(p) { return btoa(unescape(encodeURIComponent(p))); }
 
   function ensureFolder() {
-    return openSession().then(function(ok) {
-      if (!ok) throw new Error('Session invalide');
-      return fbxReq('/fs/mkdir/', {
-        method: 'POST',
-        body: JSON.stringify({ parent: b64p('/'), dirname: fbxFolder })
-      }).catch(function() {});
-    });
+    if (folderId) return Promise.resolve(folderId);
+    // Chercher dossier existant
+    return driveReq("/files?q=" + encodeURIComponent("name='" + FOLDER_NAME + "' and mimeType='application/vnd.google-apps.folder' and trashed=false") + "&fields=files(id,name)")
+      .then(function(res) {
+        if (res.files && res.files.length > 0) {
+          folderId = res.files[0].id;
+          try { localStorage.setItem("gd_folder_id", folderId); } catch(e) {}
+          return folderId;
+        }
+        // Creer le dossier
+        return fetch("https://www.googleapis.com/drive/v3/files", {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + accessToken, "Content-Type": "application/json" },
+          body: JSON.stringify({ name: FOLDER_NAME, mimeType: "application/vnd.google-apps.folder" })
+        }).then(function(r) { return r.json(); }).then(function(f) {
+          folderId = f.id;
+          try { localStorage.setItem("gd_folder_id", folderId); } catch(e) {}
+          return folderId;
+        });
+      });
   }
 
-  function uploadImg(r) {
-    if (!r.image) return Promise.resolve(null);
-    var bin = atob(r.image.split(',')[1]);
+  function uploadPhoto(receipt) {
+    if (!receipt.image || !folderId) return Promise.resolve(null);
+    var bin = atob(receipt.image.split(",")[1]);
     var arr = new Uint8Array(bin.length);
     for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    var blob = new Blob([arr], { type: 'image/jpeg' });
-    var fn = r.date + '_' + r.place.replace(/[^a-z0-9]/gi, '_') + '_' + r.id + '.jpg';
-    return fbxReq('/upload/', {
-      method: 'POST',
-      body: JSON.stringify({ dirname: b64p('/' + fbxFolder), upload_name: fn })
-    }).then(function(up) {
-      if (!up.success) throw new Error('Impossible de creer upload');
-      var base = (fbxBase || '').replace(/\/$/, '');
-      return fetch(base + '/api/v6/upload/' + up.result.id + '/send', {
-        method: 'POST',
-        headers: { 'X-Fbx-App-Auth': sessToken },
-        body: blob
-      });
-    }).then(function(rr) { return rr.json(); })
-    .then(function(j) {
-      if (!j.success) throw new Error('Erreur envoi fichier');
-      return '/' + fbxFolder + '/' + fn;
-    });
+    var blob = new Blob([arr], { type: "image/jpeg" });
+    var fn = receipt.date + "_" + receipt.place.replace(/[^a-z0-9]/gi, "_") + "_" + receipt.id + ".jpg";
+    var meta = JSON.stringify({ name: fn, parents: [folderId] });
+    var form = new FormData();
+    form.append("metadata", new Blob([meta], { type: "application/json" }));
+    form.append("file", blob);
+    return fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + accessToken },
+      body: form
+    }).then(function(r) { return r.json(); })
+    .then(function(f) { return f.webViewLink || ("https://drive.google.com/file/d/" + f.id + "/view"); });
   }
 
   function uploadIndex() {
-    return openSession().then(function(ok) {
-      if (!ok) return;
-      var data = JSON.stringify(receipts.map(function(r) {
-        var o = {};
-        Object.keys(r).forEach(function(k) { if (k !== 'image') o[k] = r[k]; });
-        return o;
-      }), null, 2);
-      var blob = new Blob([data], { type: 'application/json' });
-      return fbxReq('/upload/', {
-        method: 'POST',
-        body: JSON.stringify({ dirname: b64p('/' + fbxFolder), upload_name: 'index.json' })
-      }).then(function(up) {
-        if (!up.success) return;
-        var base = (fbxBase || '').replace(/\/$/, '');
-        return fetch(base + '/api/v6/upload/' + up.result.id + '/send', {
-          method: 'POST',
-          headers: { 'X-Fbx-App-Auth': sessToken },
-          body: blob
+    if (!folderId || !isTokenValid()) return Promise.resolve();
+    var data = JSON.stringify(receipts.map(function(r) {
+      var o = {}; Object.keys(r).forEach(function(k) { if (k !== "image") o[k] = r[k]; }); return o;
+    }), null, 2);
+    var blob = new Blob([data], { type: "application/json" });
+    // Chercher fichier existant
+    return driveReq("/files?q=" + encodeURIComponent("name='index.json' and '" + folderId + "' in parents and trashed=false") + "&fields=files(id)")
+      .then(function(res) {
+        var form = new FormData();
+        form.append("metadata", new Blob([JSON.stringify({ name: "index.json" })], { type: "application/json" }));
+        form.append("file", blob);
+        if (res.files && res.files.length > 0) {
+          var fileId = res.files[0].id;
+          return fetch("https://www.googleapis.com/upload/drive/v3/files/" + fileId + "?uploadType=multipart", {
+            method: "PATCH", headers: { "Authorization": "Bearer " + accessToken }, body: form
+          });
+        }
+        form = new FormData();
+        form.append("metadata", new Blob([JSON.stringify({ name: "index.json", parents: [folderId] })], { type: "application/json" }));
+        form.append("file", blob);
+        return fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+          method: "POST", headers: { "Authorization": "Bearer " + accessToken }, body: form
         });
       });
-    });
   }
 
-  // ==== SYNC ====
+  // ---- SYNC ----
   function syncOne(rec) {
-    if (!appToken) return;
-    setSync('sy', 'Envoi vers Freebox...');
+    if (!isTokenValid()) return;
+    setSync("sy", "Envoi vers Google Drive...");
     ensureFolder().then(function() {
-      if (rec.image && !rec.nasFile) {
-        return uploadImg(rec).then(function(path) { rec.nasFile = path; saveLocal(); });
+      if (rec.image && !rec.driveLink) {
+        return uploadPhoto(rec).then(function(link) { rec.driveLink = link; saveLocal(); });
       }
     }).then(function() { return uploadIndex(); })
-    .then(function() { setSync('ok', 'Sauvegarde sur Freebox'); render(); })
-    .catch(function(e) { setSync('er', 'Erreur: ' + e.message); });
+    .then(function() { setSync("ok", "Sauvegarde sur Google Drive"); render(); })
+    .catch(function(e) { setSync("er", "Erreur: " + e.message); });
   }
 
   window.syncAll = function() {
-    if (!appToken) return;
-    setSync('sy', 'Synchronisation...');
+    if (!isTokenValid()) { toast("Reconnectez Google Drive", true); return; }
+    setSync("sy", "Synchronisation...");
     ensureFolder().then(function() {
-      var pending = receipts.filter(function(r) { return r.image && !r.nasFile; });
+      var pending = receipts.filter(function(r) { return r.image && !r.driveLink; });
       return pending.reduce(function(p, r) {
-        return p.then(function() {
-          return uploadImg(r).then(function(path) { r.nasFile = path; });
-        });
+        return p.then(function() { return uploadPhoto(r).then(function(link) { r.driveLink = link; }); });
       }, Promise.resolve());
     }).then(function() { saveLocal(); return uploadIndex(); })
-    .then(function() { setSync('ok', 'Tout synchronise - ' + receipts.length + ' recu(s)'); render(); })
-    .catch(function(e) { setSync('er', 'Erreur: ' + e.message); });
+    .then(function() { setSync("ok", "Tout synchronise - " + receipts.length + " recu(s)"); render(); })
+    .catch(function(e) { setSync("er", "Erreur: " + e.message); });
   };
 
   function setSync(state, txt) {
-    document.getElementById('syncbar').className = 'syncbar on';
-    document.getElementById('sdot').className = 'sdot ' + state;
-    document.getElementById('stxt').textContent = txt;
+    document.getElementById("syncbar").className = "syncbar on";
+    document.getElementById("sdot").className = "sdot " + state;
+    document.getElementById("stxt").textContent = txt;
   }
 
-  // ==== BOUTON FREEBOX ====
+  // ---- BOUTON ----
   function updateBtn() {
-    var btn = document.getElementById('fbxbtn');
-    var ban = document.getElementById('iosbanner');
-    if (appToken) {
-      btn.className = 'fbxbtn cd';
-      btn.innerHTML = '<span class="fbxdot"></span> Freebox NAS';
-      ban.className = 'iosbanner';
-      setSync('ok', 'Connecte - /' + fbxFolder);
+    var btn = document.getElementById("gdrive-btn");
+    if (isTokenValid()) {
+      btn.className = "gdrive-btn cd";
+      btn.innerHTML = '<span class="gdot"></span> Google Drive';
+      setSync("ok", "Google Drive connecte");
     } else {
-      btn.className = 'fbxbtn co';
-      btn.textContent = 'Freebox NAS';
-      if (isPwa()) ban.className = 'iosbanner on';
+      btn.className = "gdrive-btn co";
+      btn.innerHTML = "&#9654; Google Drive";
+      document.getElementById("syncbar").className = "syncbar";
     }
   }
 
-  window.handleFbx = function() {
-    if (appToken) {
-      if (confirm('Deconnecter la Freebox ?')) {
-        appToken = sessToken = null; sessExp = 0;
-        try { localStorage.removeItem('fbx_app_token'); } catch(e) {}
-        document.getElementById('syncbar').className = 'syncbar';
+  window.handleDriveBtn = function() {
+    if (isTokenValid()) {
+      if (confirm("Deconnecter Google Drive ?")) {
+        accessToken = null; tokenExpiry = 0; folderId = null;
+        try { localStorage.removeItem("gd_token"); localStorage.removeItem("gd_expiry"); localStorage.removeItem("gd_folder_id"); } catch(e) {}
+        document.getElementById("syncbar").className = "syncbar";
         updateBtn();
       }
-    } else { openSetup(); }
+    } else { openDriveModal(); }
   };
 
-  // ==== SETUP ====
-  function openSetup() {
-    if (fbxBase) document.getElementById('inp-url').value = fbxBase;
-    document.getElementById('inp-folder').value = fbxFolder;
-    showStep('s1');
-    document.getElementById('mo-setup').className = 'mo on';
-  }
+  function openDriveModal() { document.getElementById("mo-drive").className = "mo on"; }
+  window.closeDriveModal = function() { document.getElementById("mo-drive").className = "mo"; };
+  window.connectDrive = connectDrive;
 
-  window.closeSetup = function() {
-    if (pollTmr) { clearInterval(pollTmr); pollTmr = null; }
-    document.getElementById('mo-setup').className = 'mo';
-  };
-
-  window.showStep = function(id) {
-    document.querySelectorAll('.step').forEach(function(s) { s.className = 'step'; });
-    document.getElementById(id).className = 'step on';
-  };
-
-  window.s1next = function() {
-    var url = document.getElementById('inp-url').value.trim().replace(/\/$/, '');
-    var folder = document.getElementById('inp-folder').value.trim() || 'MesRecus';
-    if (!url) { alert('Veuillez entrer l adresse de votre Freebox.'); return; }
-    fbxBase = url; fbxFolder = folder;
-    try { localStorage.setItem('fbx_base', fbxBase); } catch(e) {}
-    try { localStorage.setItem('fbx_folder', fbxFolder); } catch(e) {}
-    if (isPwa()) { showStep('s-ios'); return; }
-    launchAuth();
-  };
-
-  window.openSafari = function() {
-    try { localStorage.setItem('fbx_pending', '1'); } catch(e) {}
-    var target = location.href.split('?')[0].split('#')[0] + '?fbx_auth=1';
-    window.open(target, '_blank');
-    window.closeSetup();
-  };
-
-  function launchAuth() {
-    showStep('s2');
-    registerApp().then(function(tid) { return pollAuth(tid); })
-    .then(function() {
-      showStep('s3');
-      updateBtn();
-      toast('Freebox connectee !');
-      return openSession().then(function() { return ensureFolder(); });
-    }).catch(function(e) {
-      showStep('s1');
-      toast('Erreur: ' + e.message, true);
-    });
-  }
-
-  window.cancelAuth = function() {
-    if (pollTmr) { clearInterval(pollTmr); pollTmr = null; }
-    showStep('s1');
-  };
-
-  function handleAuthParam() {
-    try {
-      var p = new URLSearchParams(location.search);
-      if (p.get('fbx_auth') !== '1') return;
-      history.replaceState({}, '', location.pathname);
-      if (!appToken && fbxBase) {
-        setTimeout(function() {
-          openSetup();
-          setTimeout(launchAuth, 300);
-        }, 400);
-      }
-    } catch(e) {}
-  }
-
-  // ==== CAPTURE ====
-  document.getElementById('fi').addEventListener('change', function(e) {
-    var file = e.target.files[0];
-    if (!file) return;
+  // ---- CAPTURE ----
+  document.getElementById("fi").addEventListener("change", function(e) {
+    var file = e.target.files[0]; if (!file) return;
     var rd = new FileReader();
     rd.onload = function(ev) {
       var img = new Image();
       img.onload = function() {
-        var c = document.createElement('canvas');
+        var c = document.createElement("canvas");
         var s = Math.min(1, 1200 / img.width);
-        c.width = Math.round(img.width * s);
-        c.height = Math.round(img.height * s);
-        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-        curImg = c.toDataURL('image/jpeg', 0.75);
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        curImg = c.toDataURL("image/jpeg", 0.75);
         openAdd();
       };
       img.src = ev.target.result;
     };
-    rd.readAsDataURL(file);
-    this.value = '';
+    rd.readAsDataURL(file); this.value = "";
   });
 
-  // ==== MODAL AJOUT ====
   function openAdd() {
-    document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
-    document.getElementById('f-amt').value = '';
-    document.getElementById('f-place').value = '';
-    document.getElementById('f-notes').value = '';
-    var pi = document.getElementById('previmg');
-    pi.src = curImg || '';
-    pi.style.display = curImg ? 'block' : 'none';
-    document.getElementById('mo-add').className = 'mo on';
+    document.getElementById("f-date").value = new Date().toISOString().slice(0, 10);
+    ["f-amt","f-place","f-notes"].forEach(function(id) { document.getElementById(id).value = ""; });
+    var pi = document.getElementById("previmg");
+    pi.src = curImg || ""; pi.style.display = curImg ? "block" : "none";
+    document.getElementById("mo-add").className = "mo on";
   }
-
-  window.closeAdd = function() {
-    document.getElementById('mo-add').className = 'mo';
-    curImg = null;
-  };
+  window.closeAdd = function() { document.getElementById("mo-add").className = "mo"; curImg = null; };
 
   window.saveRec = function() {
-    var date = document.getElementById('f-date').value;
-    var amt = parseFloat(document.getElementById('f-amt').value);
-    var place = document.getElementById('f-place').value.trim();
-    var notes = document.getElementById('f-notes').value.trim();
-    if (!date) { alert('Date requise.'); return; }
-    if (!amt || amt <= 0) { alert('Montant invalide.'); return; }
-    if (!place) { alert('Lieu requis.'); return; }
-    var rec = {
-      id: Date.now().toString(),
-      date: date, amount: amt, place: place, notes: notes,
-      image: curImg, nasFile: null,
-      createdAt: new Date().toISOString()
-    };
-    receipts.unshift(rec);
-    saveLocal();
-    window.closeAdd();
-    render();
-    toast('Recu enregistre');
-    if (appToken) syncOne(rec);
+    var date = document.getElementById("f-date").value;
+    var amt = parseFloat(document.getElementById("f-amt").value);
+    var place = document.getElementById("f-place").value.trim();
+    var notes = document.getElementById("f-notes").value.trim();
+    if (!date) { alert("Date requise."); return; }
+    if (!amt || amt <= 0) { alert("Montant invalide."); return; }
+    if (!place) { alert("Lieu requis."); return; }
+    var rec = { id: Date.now().toString(), date: date, amount: amt, place: place, notes: notes, image: curImg, driveLink: null, createdAt: new Date().toISOString() };
+    receipts.unshift(rec); saveLocal(); window.closeAdd(); render();
+    toast("Recu enregistre");
+    if (isTokenValid()) syncOne(rec);
   };
 
-  // ==== DETAIL ====
+  // ---- DETAIL ----
   window.openDet = function(id) {
-    var r = null;
-    for (var i = 0; i < receipts.length; i++) { if (receipts[i].id === id) { r = receipts[i]; break; } }
-    if (!r) return;
-    var ds = '';
-    try { ds = new Date(r.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
-    catch(e) { ds = r.date; }
-    var h = '';
-    if (r.image) {
-      h += '<img src="' + r.image + '" class="dimg" onclick="openFso(' + JSON.stringify(id) + ')" title="Agrandir">';
-    } else {
-      h += '<div style="background:var(--cream);border-radius:10px;height:110px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;margin-bottom:.9rem">-</div>';
-    }
-    if (r.nasFile) h += '<div style="background:#fff0f0;color:var(--fbx);font-size:.72rem;padding:5px 10px;border-radius:6px;margin-bottom:.9rem;display:inline-block">Freebox: ' + r.nasFile + '</div>';
-    h += '<div class="damt">' + r.amount.toFixed(2).replace('.', ',') + ' EUR</div>';
-    h += '<div class="drow"><span class="dk">Lieu</span><span class="dv">' + r.place + '</span></div>';
-    h += '<div class="drow"><span class="dk">Date</span><span class="dv">' + ds + '</span></div>';
-    if (r.notes) h += '<div class="drow"><span class="dk">Motif</span><span class="dv" style="text-align:right;max-width:60%">' + r.notes + '</span></div>';
-    h += '<div class="drow"><span class="dk">Enregistre</span><span class="dv">';
-    try { h += new Date(r.createdAt).toLocaleDateString('fr-FR'); } catch(e) { h += ''; }
-    h += '</span></div>';
-    if (r.image) h += '<button class="exbtn" style="margin-top:.9rem;width:100%;justify-content:center" onclick="dlImg(' + JSON.stringify(id) + ')">Telecharger image</button>';
+    var r = receipts.find(function(x) { return x.id === id; }); if (!r) return;
+    var ds = ""; try { ds = new Date(r.date + "T12:00:00").toLocaleDateString("fr-FR", { weekday:"long", day:"numeric", month:"long", year:"numeric" }); } catch(e) { ds = r.date; }
+    var h = r.image ? '<img src="' + r.image + '" class="dimg" onclick="openFso(' + JSON.stringify(id) + ')">' : '<div style="background:var(--cream);border-radius:10px;height:110px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:.9rem">&#129413;</div>';
+    if (r.driveLink) h += '<a href="' + r.driveLink + '" target="_blank" style="display:inline-block;background:#e8f0fe;color:var(--gdrive);font-size:.72rem;padding:5px 10px;border-radius:6px;margin-bottom:.9rem;text-decoration:none">&#9729; Voir sur Google Drive</a>';
+    h += '<div class="damt">' + r.amount.toFixed(2).replace(".", ",") + " EUR</div>";
+    h += '<div class="drow"><span class="dk">Lieu</span><span class="dv">' + r.place + "</span></div>";
+    h += '<div class="drow"><span class="dk">Date</span><span class="dv">' + ds + "</span></div>";
+    if (r.notes) h += '<div class="drow"><span class="dk">Motif</span><span class="dv">' + r.notes + "</span></div>";
+    h += '<div class="drow"><span class="dk">Enregistre</span><span class="dv">' + (function(){ try { return new Date(r.createdAt).toLocaleDateString("fr-FR"); } catch(e) { return ""; } })() + "</span></div>";
+    if (r.image) h += '<button class="exbtn" style="margin-top:.9rem;width:100%;justify-content:center" onclick="dlImg(' + JSON.stringify(id) + ')">&#8595; Telecharger image</button>';
     h += '<button class="bd" onclick="delRec(' + JSON.stringify(id) + ')">Supprimer ce recu</button>';
-    document.getElementById('detcont').innerHTML = h;
-    document.getElementById('mo-det').className = 'mo on';
+    document.getElementById("detcont").innerHTML = h;
+    document.getElementById("mo-det").className = "mo on";
   };
-
-  window.closeDet = function() { document.getElementById('mo-det').className = 'mo'; };
-
+  window.closeDet = function() { document.getElementById("mo-det").className = "mo"; };
   window.delRec = function(id) {
-    if (!confirm('Supprimer definitivement ce recu ?')) return;
+    if (!confirm("Supprimer definitivement ?")) return;
     receipts = receipts.filter(function(x) { return x.id !== id; });
-    saveLocal();
-    window.closeDet();
-    render();
-    toast('Recu supprime');
-    if (appToken) uploadIndex().catch(function() {});
+    saveLocal(); window.closeDet(); render(); toast("Recu supprime");
+    if (isTokenValid()) uploadIndex().catch(function(){});
   };
-
   window.dlImg = function(id) {
-    var r = null;
-    for (var i = 0; i < receipts.length; i++) { if (receipts[i].id === id) { r = receipts[i]; break; } }
-    if (!r || !r.image) return;
-    var a = document.createElement('a');
-    a.href = r.image;
-    a.download = 'recu_' + r.date + '_' + r.place.replace(/\s+/g, '-') + '.jpg';
-    a.click();
+    var r = receipts.find(function(x) { return x.id === id; }); if (!r || !r.image) return;
+    var a = document.createElement("a"); a.href = r.image;
+    a.download = "recu_" + r.date + "_" + r.place.replace(/\s+/g, "-") + ".jpg"; a.click();
   };
-
   window.openFso = function(id) {
-    var r = null;
-    for (var i = 0; i < receipts.length; i++) { if (receipts[i].id === id) { r = receipts[i]; break; } }
-    if (!r || !r.image) return;
-    document.getElementById('fsoimg').src = r.image;
-    document.getElementById('fso').className = 'fso on';
+    var r = receipts.find(function(x) { return x.id === id; }); if (!r || !r.image) return;
+    document.getElementById("fsoimg").src = r.image; document.getElementById("fso").className = "fso on";
   };
-  window.closeFso = function() { document.getElementById('fso').className = 'fso'; };
+  window.closeFso = function() { document.getElementById("fso").className = "fso"; };
 
-  // ==== EXPORT CSV ====
+  // ---- EXPORT CSV ----
   window.exportCSV = function() {
-    var f = getFiltered();
-    if (!f.length) { alert('Aucun recu a exporter.'); return; }
-    var csv = 'Date;Lieu;Montant EUR;Motif;Chemin Freebox\n';
-    for (var i = 0; i < f.length; i++) {
-      var r = f[i];
-      csv += r.date + ';' + (r.place || '').replace(/;/g, ',') + ';' + r.amount.toFixed(2) + ';' + (r.notes || '').replace(/;/g, ',') + ';' + (r.nasFile || '') + '\n';
-    }
-    var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = 'recus_' + selYear + '.csv'; a.click();
-    URL.revokeObjectURL(url);
-    toast('CSV exporte');
+    var f = receipts.filter(function(r) { return r.date && r.date.indexOf(String(selYear)) === 0; });
+    if (!f.length) { alert("Aucun recu."); return; }
+    var csv = "Date;Lieu;Montant EUR;Motif;Lien Drive\n";
+    f.forEach(function(r) { csv += r.date + ";" + (r.place||"").replace(/;/g,",") + ";" + r.amount.toFixed(2) + ";" + (r.notes||"").replace(/;/g,",") + ";" + (r.driveLink||"") + "\n"; });
+    var blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob); var a = document.createElement("a");
+    a.href = url; a.download = "note2frais_" + selYear + ".csv"; a.click(); URL.revokeObjectURL(url);
+    toast("CSV exporte");
   };
 
-  // ==== RENDER ====
-  function getFiltered() {
-    return receipts.filter(function(r) { return r.date && r.date.indexOf(String(selYear)) === 0; });
-  }
-
+  // ---- RENDER ----
   window.setYear = function(y) { selYear = y; render(); };
-
   function render() {
     var allY = [String(new Date().getFullYear())];
-    for (var i = 0; i < receipts.length; i++) {
-      if (receipts[i].date) allY.push(receipts[i].date.slice(0, 4));
-    }
-    var uniqY = allY.filter(function(v, i, a) { return a.indexOf(v) === i; });
-    uniqY.sort(function(a, b) { return Number(b) - Number(a); });
-    var yhtml = '';
-    for (var i = 0; i < uniqY.length; i++) {
-      yhtml += '<button class="ybtn' + (uniqY[i] == selYear ? ' ac' : '') + '" onclick="setYear(' + uniqY[i] + ')">' + uniqY[i] + '</button>';
-    }
-    document.getElementById('yfilters').innerHTML = yhtml;
-
-    var f = getFiltered();
-    var tot = 0;
-    for (var i = 0; i < f.length; i++) tot += f[i].amount;
-    document.getElementById('stat-total').textContent = tot.toFixed(2).replace('.', ',') + ' EUR';
-    document.getElementById('stat-count').textContent = f.length;
-    document.getElementById('fcnt').textContent = f.length + ' recu' + (f.length !== 1 ? 's' : '') + ' - ' + tot.toFixed(2).replace('.', ',') + ' EUR';
-
-    var c = document.getElementById('rcont');
-    if (!f.length) {
-      c.innerHTML = '<div class="empty"><div class="eico">Recu</div><div class="etit">Aucun recu pour ' + selYear + '</div><div class="etxt">Photographiez votre premier recu.</div></div>';
-      return;
-    }
-
+    receipts.forEach(function(r) { if (r.date) allY.push(r.date.slice(0, 4)); });
+    var uniqY = allY.filter(function(v, i, a) { return a.indexOf(v) === i; }).sort(function(a,b){return b-a;});
+    document.getElementById("yfilters").innerHTML = uniqY.map(function(y) {
+      return '<button class="ybtn' + (y == selYear ? " ac" : "") + '" onclick="setYear(' + y + ')">' + y + "</button>";
+    }).join("");
+    var f = receipts.filter(function(r) { return r.date && r.date.indexOf(String(selYear)) === 0; });
+    var tot = f.reduce(function(s, r) { return s + r.amount; }, 0);
+    document.getElementById("stat-total").textContent = tot.toFixed(2).replace(".", ",") + " EUR";
+    document.getElementById("stat-count").textContent = f.length;
+    document.getElementById("fcnt").textContent = f.length + " recu" + (f.length !== 1 ? "s" : "") + " - " + tot.toFixed(2).replace(".", ",") + " EUR";
+    var c = document.getElementById("rcont");
+    if (!f.length) { c.innerHTML = '<div class="empty"><div class="eico">&#129413;</div><div class="etit">Aucun recu pour ' + selYear + '</div><div class="etxt">Photographiez votre premier recu.</div></div>'; return; }
     var groups = {};
-    for (var i = 0; i < f.length; i++) {
-      var k = f[i].date.slice(0, 7);
-      if (!groups[k]) groups[k] = [];
-      groups[k].push(f[i]);
-    }
-    var keys = Object.keys(groups).sort(function(a, b) { return b > a ? 1 : -1; });
-    var html = '';
-    for (var ki = 0; ki < keys.length; ki++) {
-      var k = keys[ki];
-      var mrs = groups[k];
-      var mt = 0;
-      for (var i = 0; i < mrs.length; i++) mt += mrs[i].amount;
-      var mlbl = '';
-      try { mlbl = new Date(k + '-01T12:00:00').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }); mlbl = mlbl.charAt(0).toUpperCase() + mlbl.slice(1); }
-      catch(e) { mlbl = k; }
-      html += '<div class="mg"><div class="mth"><span>' + mlbl + '</span><span class="mtt">' + mt.toFixed(2).replace('.', ',') + ' EUR</span></div><div class="rgrid">';
-      for (var i = 0; i < mrs.length; i++) {
-        var r = mrs[i];
-        var dl = '';
-        try { dl = new Date(r.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }); }
-        catch(e) { dl = r.date; }
-        var im = r.image ? '<img class="rimg" src="' + r.image + '" loading="lazy">' : '<div class="rnimg">-</div>';
-        var nas = r.nasFile ? '<div class="rnas">NAS</div>' : '';
-        html += '<div class="rcard" onclick="openDet(' + JSON.stringify(r.id) + ')">' + im + nas + '<div class="rbadge">OK</div><div class="rbody"><div class="rplace">' + r.place + '</div><div class="rdate">' + dl + '</div><div class="ramt">' + r.amount.toFixed(2).replace('.', ',') + ' EUR</div></div></div>';
-      }
-      html += '</div></div>';
-    }
+    f.forEach(function(r) { var k = r.date.slice(0, 7); if (!groups[k]) groups[k] = []; groups[k].push(r); });
+    var keys = Object.keys(groups).sort(function(a,b){return b>a?1:-1;});
+    var html = "";
+    keys.forEach(function(k) {
+      var mrs = groups[k]; var mt = mrs.reduce(function(s,r){return s+r.amount;},0);
+      var lbl = ""; try { lbl = new Date(k+"-01T12:00:00").toLocaleDateString("fr-FR",{month:"long",year:"numeric"}); lbl=lbl.charAt(0).toUpperCase()+lbl.slice(1); } catch(e){lbl=k;}
+      html += '<div class="mg"><div class="mth"><span>' + lbl + '</span><span class="mtt">' + mt.toFixed(2).replace(".",",") + " EUR</span></div><div class="rgrid">";
+      mrs.forEach(function(r) {
+        var dl = ""; try { dl = new Date(r.date+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"short"}); } catch(e){dl=r.date;}
+        var im = r.image ? '<img class="rimg" src="'+r.image+'" loading="lazy">' : '<div class="rnimg">&#129413;</div>';
+        var dr = r.driveLink ? '<div class="rdrive">Drive</div>' : "";
+        html += '<div class="rcard" onclick="openDet('+JSON.stringify(r.id)+')">' + im + dr + '<div class="rbadge">OK</div><div class="rbody"><div class="rplace">'+r.place+'</div><div class="rdate">'+dl+'</div><div class="ramt">'+r.amount.toFixed(2).replace(".",",")+" EUR</div></div></div>";
+      });
+      html += "</div></div>";
+    });
     c.innerHTML = html;
   }
 
-  // ==== TOAST ====
   function toast(msg, isErr) {
-    var t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast on' + (isErr ? ' er' : '');
-    setTimeout(function() { t.className = 'toast'; }, 2800);
+    var t = document.getElementById("toast"); t.textContent = msg;
+    t.className = "toast on" + (isErr ? " er" : "");
+    setTimeout(function() { t.className = "toast"; }, 2800);
   }
 
-  // ==== CLAVIER ====
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      window.closeSetup();
-      window.closeAdd();
-      window.closeDet();
-      window.closeFso();
-    }
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") { window.closeDriveModal(); window.closeAdd(); window.closeDet(); window.closeFso(); }
   });
 
-  // ==== INIT ====
   loadLocal();
-  handleAuthParam();
+  handleRedirectReturn();
   updateBtn();
   render();
-  if (appToken && fbxBase) {
-    openSession().then(function(ok) {
-      if (ok) setSync('ok', 'Connecte - /' + fbxFolder);
-    }).catch(function() {});
+  if (isTokenValid()) {
+    ensureFolder().then(function() { setSync("ok", "Google Drive connecte"); }).catch(function(){});
   }
 })();
 </script>
 
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('./sw.js')
-      .then(function(reg) {
-        reg.addEventListener('updatefound', function() {
-          var nw = reg.installing;
-          nw.addEventListener('statechange', function() {
-            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-              if (confirm('Mise a jour disponible. Recharger ?')) {
-                nw.postMessage('skipWaiting');
-                location.reload();
-              }
-            }
-          });
-        });
-      })
-      .catch(function(e) { console.log('SW error:', e); });
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function() {
+    navigator.serviceWorker.register("./sw.js").catch(function(e) { console.log("SW:", e); });
   });
 }
 </script>
