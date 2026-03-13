@@ -384,7 +384,7 @@ textarea{resize:vertical;min-height:55px}
     var arr = new Uint8Array(bin.length);
     for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
     var blob = new Blob([arr], { type: "image/jpeg" });
-    var fn = receipt.date + "_" + receipt.place.replace(/[^a-z0-9]/gi, "_") + "_" + receipt.id + ".jpg";
+    var fn = receipt.date + "_" + receipt.place.replace(/[^a-z0-9]/gi, "_").replace(/_+/g, "_").replace(/^_|_$/g, "") + ".jpg";
     var meta = JSON.stringify({ name: fn, parents: [folderId] });
     var form = new FormData();
     form.append("metadata", new Blob([meta], { type: "application/json" }));
@@ -403,23 +403,33 @@ textarea{resize:vertical;min-height:55px}
       var o = {}; Object.keys(r).forEach(function(k) { if (k !== "image") o[k] = r[k]; }); return o;
     }), null, 2);
     var blob = new Blob([data], { type: "application/json" });
-    // Chercher fichier existant
+    // Chercher tous les index.json existants (peut y en avoir plusieurs à cause du bug)
     return driveReq("/files?q=" + encodeURIComponent("name='index.json' and '" + folderId + "' in parents and trashed=false") + "&fields=files(id)")
       .then(function(res) {
-        var form = new FormData();
-        form.append("metadata", new Blob([JSON.stringify({ name: "index.json" })], { type: "application/json" }));
-        form.append("file", blob);
-        if (res.files && res.files.length > 0) {
-          var fileId = res.files[0].id;
-          return fetch("https://www.googleapis.com/upload/drive/v3/files/" + fileId + "?uploadType=multipart", {
-            method: "PATCH", headers: { "Authorization": "Bearer " + accessToken }, body: form
+        var files = (res.files || []);
+        // Supprimer les doublons éventuels (garder le premier, supprimer les autres)
+        var deletePromises = files.slice(1).map(function(f) {
+          return fetch("https://www.googleapis.com/drive/v3/files/" + f.id, {
+            method: "DELETE", headers: { "Authorization": "Bearer " + accessToken }
           });
-        }
-        form = new FormData();
-        form.append("metadata", new Blob([JSON.stringify({ name: "index.json", parents: [folderId] })], { type: "application/json" }));
-        form.append("file", blob);
-        return fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
-          method: "POST", headers: { "Authorization": "Bearer " + accessToken }, body: form
+        });
+        return Promise.all(deletePromises).then(function() {
+          var form = new FormData();
+          if (files.length > 0) {
+            // Mettre à jour le fichier existant (PATCH sur l'ID, sans changer parents)
+            form.append("file", blob);
+            return fetch("https://www.googleapis.com/upload/drive/v3/files/" + files[0].id + "?uploadType=media", {
+              method: "PATCH",
+              headers: { "Authorization": "Bearer " + accessToken, "Content-Type": "application/json" },
+              body: blob
+            });
+          }
+          // Créer le fichier pour la première fois
+          form.append("metadata", new Blob([JSON.stringify({ name: "index.json", parents: [folderId] })], { type: "application/json" }));
+          form.append("file", blob);
+          return fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+            method: "POST", headers: { "Authorization": "Bearer " + accessToken }, body: form
+          });
         });
       });
   }
