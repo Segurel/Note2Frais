@@ -464,16 +464,59 @@ textarea{resize:vertical;min-height:55px}
   }
 
   // ---- SYNC ----
+  var uploadIndexPending = false;
+
+  function uploadIndex() {
+    if (!folderId || !isTokenValid()) return Promise.resolve();
+    // Eviter les appels parallèles qui créent des doublons
+    if (uploadIndexPending) return Promise.resolve();
+    uploadIndexPending = true;
+
+    var data = JSON.stringify(receipts.map(function(r) {
+      var o = {}; Object.keys(r).forEach(function(k) { if (k !== "image") o[k] = r[k]; }); return o;
+    }), null, 2);
+    var blob = new Blob([data], { type: "application/json" });
+
+    return driveReq("/files?q=" + encodeURIComponent("name='index.json' and '" + folderId + "' in parents and trashed=false") + "&fields=files(id)")
+      .then(function(res) {
+        var files = (res.files || []);
+        // Supprimer les doublons éventuels
+        var deletePromises = files.slice(1).map(function(f) {
+          return fetch("https://www.googleapis.com/drive/v3/files/" + f.id, {
+            method: "DELETE", headers: { "Authorization": "Bearer " + accessToken }
+          });
+        });
+        return Promise.all(deletePromises).then(function() {
+          if (files.length > 0) {
+            return fetch("https://www.googleapis.com/upload/drive/v3/files/" + files[0].id + "?uploadType=media", {
+              method: "PATCH",
+              headers: { "Authorization": "Bearer " + accessToken, "Content-Type": "application/json" },
+              body: blob
+            });
+          }
+          var form = new FormData();
+          form.append("metadata", new Blob([JSON.stringify({ name: "index.json", parents: [folderId] })], { type: "application/json" }));
+          form.append("file", blob);
+          return fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+            method: "POST", headers: { "Authorization": "Bearer " + accessToken }, body: form
+          });
+        });
+      })
+      .finally(function() { uploadIndexPending = false; });
+  }
+
   function syncOne(rec) {
     if (!isTokenValid()) return;
     setSync("sy", "Envoi vers Google Drive...");
-    ensureFolder().then(function() {
-      if (rec.image && !rec.driveLink) {
-        return uploadPhoto(rec).then(function(link) { rec.driveLink = link; saveLocal(); });
-      }
-    }).then(function() { return uploadIndex(); })
-    .then(function() { setSync("ok", "Sauvegarde sur Google Drive"); render(); })
-    .catch(function(e) { setSync("er", "Erreur: " + e.message); });
+    ensureFolder()
+      .then(function() {
+        if (rec.image && !rec.driveLink) {
+          return uploadPhoto(rec).then(function(link) { rec.driveLink = link; saveLocal(); });
+        }
+      })
+      .then(function() { return uploadIndex(); })
+      .then(function() { setSync("ok", "Sauvegarde sur Google Drive"); render(); })
+      .catch(function(e) { setSync("er", "Erreur: " + e.message); });
   }
 
   window.syncAll = function() {
