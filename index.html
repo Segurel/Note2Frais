@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MesRecus</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#1a1612">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MesRecus">
+<link rel="apple-touch-icon" href="./icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1a1612;--paper:#f5f0e8;--cream:#ede8dc;--accent:#c8522a;--gold:#b89a4e;--muted:#7a7268;--success:#3a7d5a;--border:#d4cfc4;--fbx:#e2001a;--sh:0 2px 16px rgba(26,22,18,.1);--shlg:0 8px 40px rgba(26,22,18,.15)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"DM Sans",sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden}
+header{background:var(--ink);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3);gap:1rem;flex-wrap:wrap}
+.logo-title{font-family:"DM Serif Display",serif;font-size:1.4rem;color:var(--paper)}
+.logo-sub{font-size:.6rem;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;margin-top:2px}
+.hright{display:flex;align-items:center;gap:1.5rem}
+.hstats{display:flex;gap:1.5rem}
+.stat{text-align:right}
+.sv{font-family:"DM Serif Display",serif;font-size:1.2rem;color:var(--gold);display:block}
+.sl{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:#a09880}
+.fbxbtn{display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border-radius:8px;font-family:"DM Sans",sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
+.fbxbtn.co{background:var(--fbx);color:#fff}
+.fbxbtn.co:hover{background:#b5001a}
+.fbxbtn.cd{background:rgba(255,255,255,.1);color:#ffaaaa;border:1px solid rgba(255,255,255,.15)}
+.fbxdot{width:7px;height:7px;border-radius:50%;background:#5cb85c;flex-shrink:0}
+.syncbar{display:none;align-items:center;gap:.6rem;padding:.6rem 1rem;background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-bottom:1.2rem;font-size:.78rem;color:var(--muted)}
+.syncbar.on{display:flex}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .3s}
+.sdot.sy{background:var(--gold);animation:pulse 1s infinite}
+.sdot.ok{background:var(--success)}
+.sdot.er{background:#c0392b}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.stext{flex:1}
+.sbtn{padding:.3rem .7rem;background:var(--ink);color:var(--paper);border:none;border-radius:6px;font-size:.72rem;cursor:pointer}
+.sbtn:hover{background:var(--accent)}
+.iosbanner{display:none;background:#fff3cd;border:1.5px solid #ffc107;border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;font-size:.82rem;color:#856404;line-height:1.6}
+.iosbanner.on{display:block}
+main{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+.capzone{background:var(--ink);border-radius:16px;padding:2.2rem;text-align:center;cursor:pointer;transition:all .3s;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.capzone::before{content:"";position:absolute;inset:2px;border:2px dashed #3a3530;border-radius:14px;pointer-events:none}
+.capzone:hover{background:#252018;transform:translateY(-1px);box-shadow:var(--shlg)}
+.capzone:hover::before{border-color:var(--accent)}
+.capicon{font-size:2.2rem;margin-bottom:.6rem;display:block}
+.captxt{font-family:"DM Serif Display",serif;font-size:1.3rem;color:var(--paper);margin-bottom:.3rem}
+.capsub{font-size:.78rem;color:#6a6458}
+#fi{display:none}
+.ybar{display:flex;align-items:center;gap:.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.ylbl{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:.4rem}
+.ybtn{padding:.32rem .85rem;border:1.5px solid var(--border);background:transparent;color:var(--muted);border-radius:20px;font-family:"DM Sans",sans-serif;font-size:.78rem;cursor:pointer;transition:all .2s}
+.ybtn:hover{border-color:var(--accent);color:var(--accent)}
+.ybtn.ac{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.exbar{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:.9rem 1.3rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap}
+.exinfo{font-size:.78rem;color:var(--muted);line-height:1.5}
+.exinfo strong{color:var(--ink)}
+.exbtn{padding:.55rem 1.1rem;background:var(--ink);color:var(--paper);border:none;border-radius:8px;font-family:"DM Sans",sans-serif;font-size:.78rem;cursor:pointer;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:.4rem}
+.exbtn:hover{background:var(--accent)}
+.sech{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:.8rem}
+.setit{font-family:"DM Serif Display",serif;font-size:1.1rem}
+.secnt{font-size:.72rem;color:var(--muted)}
+.mg{margin-bottom:1.8rem}
+.mth{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding-bottom:.4rem;border-bottom:1px solid var(--border);margin-bottom:.7rem;display:flex;justify-content:space-between}
+.mtt{font-weight:600;color:var(--accent)}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.7rem}
+.rcard{background:#fff;border-radius:12px;overflow:hidden;border:1.5px solid var(--border);cursor:pointer;transition:all .2s;position:relative}
+.rcard:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--sh)}
+.rimg{width:100%;height:120px;object-fit:cover;display:block;background:var(--cream)}
+.rnimg{width:100%;height:120px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:var(--border)}
+.rbody{padding:.6rem .85rem}
+.rplace{font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rdate{font-size:.68rem;color:var(--muted);margin-top:.1rem}
+.ramt{font-family:"DM Serif Display",serif;font-size:1rem;color:var(--accent);margin-top:.15rem}
+.rbadge{position:absolute;top:7px;right:7px;background:var(--ink);color:var(--gold);font-size:.58rem;letter-spacing:.1em;padding:2px 6px;border-radius:10px;text-transform:uppercase}
+.rnas{position:absolute;top:7px;left:7px;background:var(--fbx);color:#fff;font-size:.58rem;padding:2px 6px;border-radius:10px}
+.mo{position:fixed;inset:0;background:rgba(20,16,12,.85);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.mo.on{opacity:1;pointer-events:all}
+.mbox{background:var(--paper);border-radius:20px;padding:1.8rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;transform:translateY(20px);transition:transform .3s;box-shadow:var(--shlg)}
+.mo.on .mbox{transform:translateY(0)}
+.mhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.3rem}
+.mtit{font-family:"DM Serif Display",serif;font-size:1.3rem}
+.xcbtn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--muted);transition:all .2s}
+.xcbtn:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.step{display:none}
+.step.on{display:block}
+.stit{font-family:"DM Serif Display",serif;font-size:1.1rem;margin-bottom:.6rem}
+.sdesc{font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:1rem}
+.sdesc strong{color:var(--ink)}
+.sdesc code{background:var(--cream);padding:2px 6px;border-radius:4px;font-size:.78rem}
+.wbox{background:var(--cream);border-radius:12px;padding:1.2rem;text-align:center;margin:1rem 0}
+.wico{font-size:2rem;margin-bottom:.5rem}
+.wtxt{font-size:.82rem;color:var(--muted);line-height:1.5}
+.wtxt strong{color:var(--ink)}
+.pdots{display:flex;gap:6px;justify-content:center;margin-top:.75rem}
+.pd{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.pd.on{background:var(--accent);animation:dp 1s infinite}
+@keyframes dp{0%,100%{opacity:1}50%{opacity:.3}}
+.fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.75rem}
+label{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+input,textarea{padding:.6rem .85rem;border:1.5px solid var(--border);border-radius:8px;font-family:"DM Sans",sans-serif;font-size:.88rem;background:#fff;color:var(--ink);transition:border-color .2s;outline:none}
+input:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:55px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+.frow.full{grid-template-columns:1fr}
+.bp{width:100%;padding:.85rem;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:"DM Serif Display",serif;font-size:1.05rem;cursor:pointer;transition:all .2s;margin-top:.5rem}
+.bp:hover{background:#a8421a}
+.bs{width:100%;padding:.75rem;background:transparent;color:var(--ink);border:1.5px solid var(--border);border-radius:10px;font-family:"DM Sans",sans-serif;font-size:.88rem;cursor:pointer;transition:all .2s;margin-top:.5rem}
+.bs:hover{border-color:var(--ink)}
+.bd{width:100%;padding:.65rem;background:transparent;color:#c0392b;border:1.5px solid #c0392b;border-radius:8px;font-family:"DM Sans",sans-serif;font-size:.82rem;cursor:pointer;margin-top:.9rem;transition:all .2s}
+.bd:hover{background:#c0392b;color:#fff}
+.previmg{width:100%;max-height:200px;object-fit:contain;border-radius:10px;background:var(--cream);border:1.5px solid var(--border);margin-bottom:1.1rem;display:block}
+.dimg{width:100%;max-height:280px;object-fit:contain;border-radius:10px;background:var(--cream);border:1.5px solid var(--border);margin-bottom:.9rem;cursor:pointer}
+.drow{display:flex;justify-content:space-between;align-items:baseline;padding:.55rem 0;border-bottom:1px solid var(--cream)}
+.dk{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.dv{font-weight:500;font-size:.88rem}
+.damt{font-family:"DM Serif Display",serif;font-size:1.9rem;color:var(--accent);text-align:center;margin:.9rem 0}
+.fso{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;cursor:zoom-out}
+.fso.on{opacity:1;pointer-events:all}
+.fso img{max-width:95vw;max-height:95vh;object-fit:contain}
+.empty{text-align:center;padding:3.5rem 2rem;color:var(--muted)}
+.eico{font-size:2.8rem;margin-bottom:.9rem}
+.etit{font-family:"DM Serif Display",serif;font-size:1.3rem;color:var(--ink);margin-bottom:.5rem}
+.etxt{font-size:.82rem;line-height:1.6}
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--success);color:#fff;padding:.7rem 1.4rem;border-radius:30px;font-size:.82rem;opacity:0;transition:all .3s;z-index:1000;font-weight:500;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.er{background:#c0392b}
+@media(max-width:600px){header{padding:1rem}main{padding:1rem}.frow{grid-template-columns:1fr}.rgrid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo-title">MesRecus</div>
+    <div class="logo-sub">Frais de repas</div>
+  </div>
+  <div class="hright">
+    <div class="hstats">
+      <div class="stat"><span class="sv" id="stat-total">0,00 EUR</span><span class="sl">Total</span></div>
+      <div class="stat"><span class="sv" id="stat-count">0</span><span class="sl">Recus</span></div>
+    </div>
+    <button class="fbxbtn co" id="fbxbtn" onclick="handleFbx()">Freebox NAS</button>
+  </div>
+</header>
+
+<main>
+  <div class="iosbanner" id="iosbanner">
+    <strong>iPhone (mode app)</strong> - Pour connecter la Freebox, appuyez sur le bouton Freebox NAS : Safari s'ouvrira pour l'autorisation, puis revenez ici.
+  </div>
+  <div class="syncbar" id="syncbar">
+    <div class="sdot" id="sdot"></div>
+    <span class="stext" id="stxt">Freebox connectee</span>
+    <button class="sbtn" onclick="syncAll()">Synchroniser</button>
+  </div>
+  <div class="capzone" onclick="document.getElementById('fi').click()">
+    <span class="capicon">Appareil photo</span>
+    <div class="captxt">Photographier un recu</div>
+    <div class="capsub">Photo ou import - Sauvegarde sur disque USB Freebox</div>
+    <input type="file" id="fi" accept="image/*" capture="environment">
+  </div>
+  <div class="ybar">
+    <span class="ylbl">Annee :</span>
+    <div id="yfilters"></div>
+  </div>
+  <div class="exbar">
+    <div class="exinfo"><strong>Justificatif fiscal</strong> - Photos sur votre disque Freebox dans <code>MesRecus/</code></div>
+    <button class="exbtn" onclick="exportCSV()">Export CSV</button>
+  </div>
+  <div class="sech">
+    <span class="setit">Mes recus</span>
+    <span class="secnt" id="fcnt"></span>
+  </div>
+  <div id="rcont"></div>
+</main>
+
+<!-- SETUP -->
+<div class="mo" id="mo-setup">
+  <div class="mbox">
+    <div class="mhd"><span class="mtit">Connexion Freebox</span><button class="xcbtn" onclick="closeSetup()">X</button></div>
+    <div class="step on" id="s1">
+      <div class="stit">Adresse de votre Freebox</div>
+      <div class="sdesc">
+        Activez l'acces distant sur mafreebox.freebox.fr puis entrez l'adresse fournie.<br>
+        Exemple : <code>https://xxxxxxxx.fbxos.fr</code>
+      </div>
+      <div class="fg"><label>Adresse Freebox</label><input type="url" id="inp-url" placeholder="https://xxxxxxxx.fbxos.fr" autocorrect="off" autocapitalize="none" spellcheck="false"></div>
+      <div class="fg"><label>Dossier (disque USB)</label><input type="text" id="inp-folder" value="MesRecus"></div>
+      <button class="bp" onclick="s1next()">Continuer</button>
+    </div>
+    <div class="step" id="s-ios">
+      <div class="stit">Autorisation via Safari</div>
+      <div class="sdesc">Sur iPhone en mode app, l'autorisation doit se faire dans Safari.<br>Appuyez ci-dessous, autorisez la Freebox dans Safari, puis revenez sur l'app.</div>
+      <div class="wbox"><div class="wico">Safari</div><div class="wtxt">L'autorisation se fait dans <strong>Safari</strong>, pas dans la PWA.</div></div>
+      <button class="bp" onclick="openSafari()">Ouvrir dans Safari</button>
+      <button class="bs" onclick="showStep('s1')">Retour</button>
+    </div>
+    <div class="step" id="s2">
+      <div class="stit">Autoriser sur la Freebox</div>
+      <div class="sdesc">Une notification apparait sur votre Freebox ou dans mafreebox.freebox.fr. Appuyez sur Autoriser.</div>
+      <div class="wbox">
+        <div class="wico">TV</div>
+        <div class="wtxt">En attente de votre autorisation sur la <strong>Freebox Pop</strong>...</div>
+        <div class="pdots">
+          <div class="pd on" id="pd0"></div>
+          <div class="pd" id="pd1"></div>
+          <div class="pd" id="pd2"></div>
+        </div>
+      </div>
+      <button class="bs" onclick="cancelAuth()">Annuler</button>
+    </div>
+    <div class="step" id="s3">
+      <div class="stit">Freebox connectee !</div>
+      <div class="sdesc">Vos recus seront sauvegardes sur votre disque USB Freebox.</div>
+      <div class="wbox" style="background:#eafbf0"><div class="wico">OK</div><div class="wtxt" style="color:#2a6045">Connexion etablie - token sauvegarde.</div></div>
+      <button class="bp" onclick="closeSetup()">C'est parti !</button>
+    </div>
+  </div>
+</div>
+
+<!-- AJOUT -->
+<div class="mo" id="mo-add">
+  <div class="mbox">
+    <div class="mhd"><span class="mtit">Nouveau recu</span><button class="xcbtn" onclick="closeAdd()">X</button></div>
+    <img id="previmg" class="previmg" src="" alt="" style="display:none">
+    <div class="frow">
+      <div class="fg"><label>Date</label><input type="date" id="f-date"></div>
+      <div class="fg"><label>Montant (EUR)</label><input type="number" id="f-amt" step="0.01" placeholder="12.50"></div>
+    </div>
+    <div class="frow full">
+      <div class="fg"><label>Lieu / Restaurant</label><input type="text" id="f-place" placeholder="Brasserie du Marche"></div>
+    </div>
+    <div class="frow full">
+      <div class="fg"><label>Motif (optionnel)</label><textarea id="f-notes" placeholder="Dejeuner de travail..."></textarea></div>
+    </div>
+    <button class="bp" onclick="saveRec()">Enregistrer</button>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div class="mo" id="mo-det">
+  <div class="mbox">
+    <div class="mhd"><span class="mtit">Detail du recu</span><button class="xcbtn" onclick="closeDet()">X</button></div>
+    <div id="detcont"></div>
+  </div>
+</div>
+
+<div class="fso" id="fso" onclick="closeFso()"><img id="fsoimg" src="" alt=""></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function() {
+  // ==== CONSTANTES ====
+  var SK = 'mesrecus_v3';
+  var APPID = 'fr.mesrecus.webapp';
+  var APPNAME = 'MesRecus';
+  var APPVER = '1.0.0';
+  var DEVNAME = 'Navigateur';
+
+  // ==== ETAT ====
+  var receipts = [];
+  var selYear = new Date().getFullYear();
+  var curImg = null;
+  var fbxBase = null;
+  var fbxFolder = 'MesRecus';
+  var appToken = null;
+  var sessToken = null;
+  var sessExp = 0;
+  var pollTmr = null;
+
+  // ==== STORAGE ====
+  function loadLocal() {
+    try {
+      var raw = localStorage.getItem(SK);
+      receipts = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(receipts)) receipts = [];
+    } catch(e) {
+      receipts = [];
+      try { localStorage.removeItem(SK); } catch(e2) {}
+    }
+    try { fbxBase = localStorage.getItem('fbx_base') || null; } catch(e) {}
+    try { fbxFolder = localStorage.getItem('fbx_folder') || 'MesRecus'; } catch(e) {}
+    try { appToken = localStorage.getItem('fbx_app_token') || null; } catch(e) {}
+  }
+
+  function saveLocal() {
+    try { localStorage.setItem(SK, JSON.stringify(receipts)); } catch(e) {}
+  }
+
+  // ==== DETECTION iOS PWA ====
+  function isPwa() { return window.navigator.standalone === true; }
+
+  // ==== API FREEBOX ====
+  function fbxReq(path, opts) {
+    var base = (fbxBase || '').replace(/\/$/, '');
+    var headers = { 'Content-Type': 'application/json' };
+    if (sessToken) headers['X-Fbx-App-Auth'] = sessToken;
+    if (opts && opts.headers) {
+      Object.keys(opts.headers).forEach(function(k) { headers[k] = opts.headers[k]; });
+    }
+    var fetchOpts = { method: 'GET' };
+    if (opts) {
+      if (opts.method) fetchOpts.method = opts.method;
+      if (opts.body) fetchOpts.body = opts.body;
+    }
+    fetchOpts.headers = headers;
+    return fetch(base + '/api/v6' + path, fetchOpts)
+      .then(function(r) { return r.json(); });
+  }
+
+  function hmacSha1(key, msg) {
+    var enc = new TextEncoder();
+    return crypto.subtle.importKey('raw', enc.encode(key), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign'])
+      .then(function(k) { return crypto.subtle.sign('HMAC', k, enc.encode(msg)); })
+      .then(function(sig) {
+        return Array.from(new Uint8Array(sig))
+          .map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+      });
+  }
+
+  function registerApp() {
+    return fbxReq('/login/authorize/', {
+      method: 'POST',
+      body: JSON.stringify({ app_id: APPID, app_name: APPNAME, app_version: APPVER, device_name: DEVNAME })
+    }).then(function(res) {
+      if (!res.success) throw new Error(res.msg || 'Echec autorisation');
+      appToken = res.result.app_token;
+      try { localStorage.setItem('fbx_app_token', appToken); } catch(e) {}
+      return res.result.track_id;
+    });
+  }
+
+  function pollAuth(trackId) {
+    return new Promise(function(resolve, reject) {
+      var idx = 0;
+      pollTmr = setInterval(function() {
+        fbxReq('/login/authorize/' + trackId).then(function(res) {
+          var status = res.result && res.result.status;
+          idx = (idx + 1) % 3;
+          for (var i = 0; i < 3; i++) {
+            var d = document.getElementById('pd' + i);
+            if (d) d.className = 'pd' + (i === idx ? ' on' : '');
+          }
+          if (status === 'granted') { clearInterval(pollTmr); pollTmr = null; resolve(); }
+          else if (status === 'denied' || status === 'timeout') {
+            clearInterval(pollTmr); pollTmr = null;
+            reject(new Error('Autorisation: ' + status));
+          }
+        }).catch(function(e) { clearInterval(pollTmr); pollTmr = null; reject(e); });
+      }, 2000);
+    });
+  }
+
+  function openSession() {
+    if (sessToken && Date.now() < sessExp) return Promise.resolve(true);
+    if (!appToken || !fbxBase) return Promise.resolve(false);
+    return fbxReq('/login/').then(function(r) {
+      if (!r.success) return false;
+      return hmacSha1(appToken, r.result.challenge).then(function(pwd) {
+        return fbxReq('/login/session/', {
+          method: 'POST',
+          body: JSON.stringify({ app_id: APPID, app_version: APPVER, password: pwd })
+        });
+      }).then(function(s) {
+        if (!s.success) return false;
+        sessToken = s.result.session_token;
+        sessExp = Date.now() + 55 * 60 * 1000;
+        return true;
+      });
+    }).catch(function() { return false; });
+  }
+
+  function b64p(p) { return btoa(unescape(encodeURIComponent(p))); }
+
+  function ensureFolder() {
+    return openSession().then(function(ok) {
+      if (!ok) throw new Error('Session invalide');
+      return fbxReq('/fs/mkdir/', {
+        method: 'POST',
+        body: JSON.stringify({ parent: b64p('/'), dirname: fbxFolder })
+      }).catch(function() {});
+    });
+  }
+
+  function uploadImg(r) {
+    if (!r.image) return Promise.resolve(null);
+    var bin = atob(r.image.split(',')[1]);
+    var arr = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    var blob = new Blob([arr], { type: 'image/jpeg' });
+    var fn = r.date + '_' + r.place.replace(/[^a-z0-9]/gi, '_') + '_' + r.id + '.jpg';
+    return fbxReq('/upload/', {
+      method: 'POST',
+      body: JSON.stringify({ dirname: b64p('/' + fbxFolder), upload_name: fn })
+    }).then(function(up) {
+      if (!up.success) throw new Error('Impossible de creer upload');
+      var base = (fbxBase || '').replace(/\/$/, '');
+      return fetch(base + '/api/v6/upload/' + up.result.id + '/send', {
+        method: 'POST',
+        headers: { 'X-Fbx-App-Auth': sessToken },
+        body: blob
+      });
+    }).then(function(rr) { return rr.json(); })
+    .then(function(j) {
+      if (!j.success) throw new Error('Erreur envoi fichier');
+      return '/' + fbxFolder + '/' + fn;
+    });
+  }
+
+  function uploadIndex() {
+    return openSession().then(function(ok) {
+      if (!ok) return;
+      var data = JSON.stringify(receipts.map(function(r) {
+        var o = {};
+        Object.keys(r).forEach(function(k) { if (k !== 'image') o[k] = r[k]; });
+        return o;
+      }), null, 2);
+      var blob = new Blob([data], { type: 'application/json' });
+      return fbxReq('/upload/', {
+        method: 'POST',
+        body: JSON.stringify({ dirname: b64p('/' + fbxFolder), upload_name: 'index.json' })
+      }).then(function(up) {
+        if (!up.success) return;
+        var base = (fbxBase || '').replace(/\/$/, '');
+        return fetch(base + '/api/v6/upload/' + up.result.id + '/send', {
+          method: 'POST',
+          headers: { 'X-Fbx-App-Auth': sessToken },
+          body: blob
+        });
+      });
+    });
+  }
+
+  // ==== SYNC ====
+  function syncOne(rec) {
+    if (!appToken) return;
+    setSync('sy', 'Envoi vers Freebox...');
+    ensureFolder().then(function() {
+      if (rec.image && !rec.nasFile) {
+        return uploadImg(rec).then(function(path) { rec.nasFile = path; saveLocal(); });
+      }
+    }).then(function() { return uploadIndex(); })
+    .then(function() { setSync('ok', 'Sauvegarde sur Freebox'); render(); })
+    .catch(function(e) { setSync('er', 'Erreur: ' + e.message); });
+  }
+
+  window.syncAll = function() {
+    if (!appToken) return;
+    setSync('sy', 'Synchronisation...');
+    ensureFolder().then(function() {
+      var pending = receipts.filter(function(r) { return r.image && !r.nasFile; });
+      return pending.reduce(function(p, r) {
+        return p.then(function() {
+          return uploadImg(r).then(function(path) { r.nasFile = path; });
+        });
+      }, Promise.resolve());
+    }).then(function() { saveLocal(); return uploadIndex(); })
+    .then(function() { setSync('ok', 'Tout synchronise - ' + receipts.length + ' recu(s)'); render(); })
+    .catch(function(e) { setSync('er', 'Erreur: ' + e.message); });
+  };
+
+  function setSync(state, txt) {
+    document.getElementById('syncbar').className = 'syncbar on';
+    document.getElementById('sdot').className = 'sdot ' + state;
+    document.getElementById('stxt').textContent = txt;
+  }
+
+  // ==== BOUTON FREEBOX ====
+  function updateBtn() {
+    var btn = document.getElementById('fbxbtn');
+    var ban = document.getElementById('iosbanner');
+    if (appToken) {
+      btn.className = 'fbxbtn cd';
+      btn.innerHTML = '<span class="fbxdot"></span> Freebox NAS';
+      ban.className = 'iosbanner';
+      setSync('ok', 'Connecte - /' + fbxFolder);
+    } else {
+      btn.className = 'fbxbtn co';
+      btn.textContent = 'Freebox NAS';
+      if (isPwa()) ban.className = 'iosbanner on';
+    }
+  }
+
+  window.handleFbx = function() {
+    if (appToken) {
+      if (confirm('Deconnecter la Freebox ?')) {
+        appToken = sessToken = null; sessExp = 0;
+        try { localStorage.removeItem('fbx_app_token'); } catch(e) {}
+        document.getElementById('syncbar').className = 'syncbar';
+        updateBtn();
+      }
+    } else { openSetup(); }
+  };
+
+  // ==== SETUP ====
+  function openSetup() {
+    if (fbxBase) document.getElementById('inp-url').value = fbxBase;
+    document.getElementById('inp-folder').value = fbxFolder;
+    showStep('s1');
+    document.getElementById('mo-setup').className = 'mo on';
+  }
+
+  window.closeSetup = function() {
+    if (pollTmr) { clearInterval(pollTmr); pollTmr = null; }
+    document.getElementById('mo-setup').className = 'mo';
+  };
+
+  window.showStep = function(id) {
+    document.querySelectorAll('.step').forEach(function(s) { s.className = 'step'; });
+    document.getElementById(id).className = 'step on';
+  };
+
+  window.s1next = function() {
+    var url = document.getElementById('inp-url').value.trim().replace(/\/$/, '');
+    var folder = document.getElementById('inp-folder').value.trim() || 'MesRecus';
+    if (!url) { alert('Veuillez entrer l adresse de votre Freebox.'); return; }
+    fbxBase = url; fbxFolder = folder;
+    try { localStorage.setItem('fbx_base', fbxBase); } catch(e) {}
+    try { localStorage.setItem('fbx_folder', fbxFolder); } catch(e) {}
+    if (isPwa()) { showStep('s-ios'); return; }
+    launchAuth();
+  };
+
+  window.openSafari = function() {
+    try { localStorage.setItem('fbx_pending', '1'); } catch(e) {}
+    var target = location.href.split('?')[0].split('#')[0] + '?fbx_auth=1';
+    window.open(target, '_blank');
+    window.closeSetup();
+  };
+
+  function launchAuth() {
+    showStep('s2');
+    registerApp().then(function(tid) { return pollAuth(tid); })
+    .then(function() {
+      showStep('s3');
+      updateBtn();
+      toast('Freebox connectee !');
+      return openSession().then(function() { return ensureFolder(); });
+    }).catch(function(e) {
+      showStep('s1');
+      toast('Erreur: ' + e.message, true);
+    });
+  }
+
+  window.cancelAuth = function() {
+    if (pollTmr) { clearInterval(pollTmr); pollTmr = null; }
+    showStep('s1');
+  };
+
+  function handleAuthParam() {
+    try {
+      var p = new URLSearchParams(location.search);
+      if (p.get('fbx_auth') !== '1') return;
+      history.replaceState({}, '', location.pathname);
+      if (!appToken && fbxBase) {
+        setTimeout(function() {
+          openSetup();
+          setTimeout(launchAuth, 300);
+        }, 400);
+      }
+    } catch(e) {}
+  }
+
+  // ==== CAPTURE ====
+  document.getElementById('fi').addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var rd = new FileReader();
+    rd.onload = function(ev) {
+      var img = new Image();
+      img.onload = function() {
+        var c = document.createElement('canvas');
+        var s = Math.min(1, 1200 / img.width);
+        c.width = Math.round(img.width * s);
+        c.height = Math.round(img.height * s);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        curImg = c.toDataURL('image/jpeg', 0.75);
+        openAdd();
+      };
+      img.src = ev.target.result;
+    };
+    rd.readAsDataURL(file);
+    this.value = '';
+  });
+
+  // ==== MODAL AJOUT ====
+  function openAdd() {
+    document.getElementById('f-date').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('f-amt').value = '';
+    document.getElementById('f-place').value = '';
+    document.getElementById('f-notes').value = '';
+    var pi = document.getElementById('previmg');
+    pi.src = curImg || '';
+    pi.style.display = curImg ? 'block' : 'none';
+    document.getElementById('mo-add').className = 'mo on';
+  }
+
+  window.closeAdd = function() {
+    document.getElementById('mo-add').className = 'mo';
+    curImg = null;
+  };
+
+  window.saveRec = function() {
+    var date = document.getElementById('f-date').value;
+    var amt = parseFloat(document.getElementById('f-amt').value);
+    var place = document.getElementById('f-place').value.trim();
+    var notes = document.getElementById('f-notes').value.trim();
+    if (!date) { alert('Date requise.'); return; }
+    if (!amt || amt <= 0) { alert('Montant invalide.'); return; }
+    if (!place) { alert('Lieu requis.'); return; }
+    var rec = {
+      id: Date.now().toString(),
+      date: date, amount: amt, place: place, notes: notes,
+      image: curImg, nasFile: null,
+      createdAt: new Date().toISOString()
+    };
+    receipts.unshift(rec);
+    saveLocal();
+    window.closeAdd();
+    render();
+    toast('Recu enregistre');
+    if (appToken) syncOne(rec);
+  };
+
+  // ==== DETAIL ====
+  window.openDet = function(id) {
+    var r = null;
+    for (var i = 0; i < receipts.length; i++) { if (receipts[i].id === id) { r = receipts[i]; break; } }
+    if (!r) return;
+    var ds = '';
+    try { ds = new Date(r.date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
+    catch(e) { ds = r.date; }
+    var h = '';
+    if (r.image) {
+      h += '<img src="' + r.image + '" class="dimg" onclick="openFso(' + JSON.stringify(id) + ')" title="Agrandir">';
+    } else {
+      h += '<div style="background:var(--cream);border-radius:10px;height:110px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;margin-bottom:.9rem">-</div>';
+    }
+    if (r.nasFile) h += '<div style="background:#fff0f0;color:var(--fbx);font-size:.72rem;padding:5px 10px;border-radius:6px;margin-bottom:.9rem;display:inline-block">Freebox: ' + r.nasFile + '</div>';
+    h += '<div class="damt">' + r.amount.toFixed(2).replace('.', ',') + ' EUR</div>';
+    h += '<div class="drow"><span class="dk">Lieu</span><span class="dv">' + r.place + '</span></div>';
+    h += '<div class="drow"><span class="dk">Date</span><span class="dv">' + ds + '</span></div>';
+    if (r.notes) h += '<div class="drow"><span class="dk">Motif</span><span class="dv" style="text-align:right;max-width:60%">' + r.notes + '</span></div>';
+    h += '<div class="drow"><span class="dk">Enregistre</span><span class="dv">';
+    try { h += new Date(r.createdAt).toLocaleDateString('fr-FR'); } catch(e) { h += ''; }
+    h += '</span></div>';
+    if (r.image) h += '<button class="exbtn" style="margin-top:.9rem;width:100%;justify-content:center" onclick="dlImg(' + JSON.stringify(id) + ')">Telecharger image</button>';
+    h += '<button class="bd" onclick="delRec(' + JSON.stringify(id) + ')">Supprimer ce recu</button>';
+    document.getElementById('detcont').innerHTML = h;
+    document.getElementById('mo-det').className = 'mo on';
+  };
+
+  window.closeDet = function() { document.getElementById('mo-det').className = 'mo'; };
+
+  window.delRec = function(id) {
+    if (!confirm('Supprimer definitivement ce recu ?')) return;
+    receipts = receipts.filter(function(x) { return x.id !== id; });
+    saveLocal();
+    window.closeDet();
+    render();
+    toast('Recu supprime');
+    if (appToken) uploadIndex().catch(function() {});
+  };
+
+  window.dlImg = function(id) {
+    var r = null;
+    for (var i = 0; i < receipts.length; i++) { if (receipts[i].id === id) { r = receipts[i]; break; } }
+    if (!r || !r.image) return;
+    var a = document.createElement('a');
+    a.href = r.image;
+    a.download = 'recu_' + r.date + '_' + r.place.replace(/\s+/g, '-') + '.jpg';
+    a.click();
+  };
+
+  window.openFso = function(id) {
+    var r = null;
+    for (var i = 0; i < receipts.length; i++) { if (receipts[i].id === id) { r = receipts[i]; break; } }
+    if (!r || !r.image) return;
+    document.getElementById('fsoimg').src = r.image;
+    document.getElementById('fso').className = 'fso on';
+  };
+  window.closeFso = function() { document.getElementById('fso').className = 'fso'; };
+
+  // ==== EXPORT CSV ====
+  window.exportCSV = function() {
+    var f = getFiltered();
+    if (!f.length) { alert('Aucun recu a exporter.'); return; }
+    var csv = 'Date;Lieu;Montant EUR;Motif;Chemin Freebox\n';
+    for (var i = 0; i < f.length; i++) {
+      var r = f[i];
+      csv += r.date + ';' + (r.place || '').replace(/;/g, ',') + ';' + r.amount.toFixed(2) + ';' + (r.notes || '').replace(/;/g, ',') + ';' + (r.nasFile || '') + '\n';
+    }
+    var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'recus_' + selYear + '.csv'; a.click();
+    URL.revokeObjectURL(url);
+    toast('CSV exporte');
+  };
+
+  // ==== RENDER ====
+  function getFiltered() {
+    return receipts.filter(function(r) { return r.date && r.date.indexOf(String(selYear)) === 0; });
+  }
+
+  window.setYear = function(y) { selYear = y; render(); };
+
+  function render() {
+    var allY = [String(new Date().getFullYear())];
+    for (var i = 0; i < receipts.length; i++) {
+      if (receipts[i].date) allY.push(receipts[i].date.slice(0, 4));
+    }
+    var uniqY = allY.filter(function(v, i, a) { return a.indexOf(v) === i; });
+    uniqY.sort(function(a, b) { return Number(b) - Number(a); });
+    var yhtml = '';
+    for (var i = 0; i < uniqY.length; i++) {
+      yhtml += '<button class="ybtn' + (uniqY[i] == selYear ? ' ac' : '') + '" onclick="setYear(' + uniqY[i] + ')">' + uniqY[i] + '</button>';
+    }
+    document.getElementById('yfilters').innerHTML = yhtml;
+
+    var f = getFiltered();
+    var tot = 0;
+    for (var i = 0; i < f.length; i++) tot += f[i].amount;
+    document.getElementById('stat-total').textContent = tot.toFixed(2).replace('.', ',') + ' EUR';
+    document.getElementById('stat-count').textContent = f.length;
+    document.getElementById('fcnt').textContent = f.length + ' recu' + (f.length !== 1 ? 's' : '') + ' - ' + tot.toFixed(2).replace('.', ',') + ' EUR';
+
+    var c = document.getElementById('rcont');
+    if (!f.length) {
+      c.innerHTML = '<div class="empty"><div class="eico">Recu</div><div class="etit">Aucun recu pour ' + selYear + '</div><div class="etxt">Photographiez votre premier recu.</div></div>';
+      return;
+    }
+
+    var groups = {};
+    for (var i = 0; i < f.length; i++) {
+      var k = f[i].date.slice(0, 7);
+      if (!groups[k]) groups[k] = [];
+      groups[k].push(f[i]);
+    }
+    var keys = Object.keys(groups).sort(function(a, b) { return b > a ? 1 : -1; });
+    var html = '';
+    for (var ki = 0; ki < keys.length; ki++) {
+      var k = keys[ki];
+      var mrs = groups[k];
+      var mt = 0;
+      for (var i = 0; i < mrs.length; i++) mt += mrs[i].amount;
+      var mlbl = '';
+      try { mlbl = new Date(k + '-01T12:00:00').toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }); mlbl = mlbl.charAt(0).toUpperCase() + mlbl.slice(1); }
+      catch(e) { mlbl = k; }
+      html += '<div class="mg"><div class="mth"><span>' + mlbl + '</span><span class="mtt">' + mt.toFixed(2).replace('.', ',') + ' EUR</span></div><div class="rgrid">';
+      for (var i = 0; i < mrs.length; i++) {
+        var r = mrs[i];
+        var dl = '';
+        try { dl = new Date(r.date + 'T12:00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }); }
+        catch(e) { dl = r.date; }
+        var im = r.image ? '<img class="rimg" src="' + r.image + '" loading="lazy">' : '<div class="rnimg">-</div>';
+        var nas = r.nasFile ? '<div class="rnas">NAS</div>' : '';
+        html += '<div class="rcard" onclick="openDet(' + JSON.stringify(r.id) + ')">' + im + nas + '<div class="rbadge">OK</div><div class="rbody"><div class="rplace">' + r.place + '</div><div class="rdate">' + dl + '</div><div class="ramt">' + r.amount.toFixed(2).replace('.', ',') + ' EUR</div></div></div>';
+      }
+      html += '</div></div>';
+    }
+    c.innerHTML = html;
+  }
+
+  // ==== TOAST ====
+  function toast(msg, isErr) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast on' + (isErr ? ' er' : '');
+    setTimeout(function() { t.className = 'toast'; }, 2800);
+  }
+
+  // ==== CLAVIER ====
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      window.closeSetup();
+      window.closeAdd();
+      window.closeDet();
+      window.closeFso();
+    }
+  });
+
+  // ==== INIT ====
+  loadLocal();
+  handleAuthParam();
+  updateBtn();
+  render();
+  if (appToken && fbxBase) {
+    openSession().then(function(ok) {
+      if (ok) setSync('ok', 'Connecte - /' + fbxFolder);
+    }).catch(function() {});
+  }
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js')
+      .then(function(reg) {
+        reg.addEventListener('updatefound', function() {
+          var nw = reg.installing;
+          nw.addEventListener('statechange', function() {
+            if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+              if (confirm('Mise a jour disponible. Recharger ?')) {
+                nw.postMessage('skipWaiting');
+                location.reload();
+              }
+            }
+          });
+        });
+      })
+      .catch(function(e) { console.log('SW error:', e); });
+  });
+}
+</script>
+
+</body>
+</html>
