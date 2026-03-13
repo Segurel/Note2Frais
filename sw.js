@@ -1,80 +1,88 @@
-// MesReçus — Service Worker
-// Cache-first pour fonctionner hors-ligne
+# MesReçus 🧾
 
-const CACHE_NAME = 'mesrecus-v1';
-const ASSETS = [
-  './index.html',
-  './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap'
-];
+**Application web progressive (PWA) pour photographier et stocker ses reçus de repas — déduction en frais réels aux impôts.**
 
-// Installation : mise en cache des assets statiques
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS).catch(err => {
-        // Si les fonts Google ne sont pas dispo (hors-ligne), on continue quand même
-        console.warn('Certains assets non mis en cache :', err);
-        return cache.addAll(['./index.html', './manifest.json']);
-      });
-    }).then(() => self.skipWaiting())
-  );
-});
+Fonctionne sur mobile (iOS/Android) comme une app native. Stockage des photos sur votre **disque USB Freebox** via l'API officielle Freebox OS.
 
-// Activation : suppression des vieux caches
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
-  );
-});
+---
 
-// Fetch : cache-first pour les assets locaux, network-first pour l'API Freebox
-self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
+## Fonctionnalités
 
-  // API Freebox → toujours réseau (pas de cache)
-  if (url.hostname.includes('fbxos.fr') || url.pathname.includes('/api/')) {
-    return; // laisse passer sans interception
-  }
+- 📸 **Capture photo** directement depuis la caméra du téléphone
+- 💾 **Stockage local** (localStorage) — fonctionne hors-ligne
+- 📦 **Synchronisation Freebox** — photos sauvegardées sur votre disque USB via l'API Freebox OS
+- 📊 **Suivi par année et par mois** avec totaux automatiques
+- ⬇ **Export CSV** compatible Excel pour la déclaration fiscale
+- 🔒 **Données privées** — aucun serveur tiers, tout reste chez vous
+- 📱 **PWA installable** — ajout à l'écran d'accueil iOS/Android
 
-  // Google Fonts → stale-while-revalidate
-  if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
-    event.respondWith(
-      caches.open(CACHE_NAME).then(cache =>
-        cache.match(event.request).then(cached => {
-          const networkFetch = fetch(event.request).then(response => {
-            cache.put(event.request, response.clone());
-            return response;
-          }).catch(() => cached);
-          return cached || networkFetch;
-        })
-      )
-    );
-    return;
-  }
+---
 
-  // Assets locaux → cache-first
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        // Ne pas cacher les erreurs
-        if (!response || response.status !== 200 || response.type === 'opaque') {
-          return response;
-        }
-        const toCache = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, toCache));
-        return response;
-      });
-    })
-  );
-});
+## Déploiement sur GitHub Pages
 
-// Notification de mise à jour disponible
-self.addEventListener('message', event => {
-  if (event.data === 'skipWaiting') self.skipWaiting();
-});
+### 1. Forker / cloner ce dépôt
+
+```bash
+git clone https://github.com/VOTRE_USER/mesrecus.git
+cd mesrecus
+```
+
+### 2. Activer GitHub Pages
+
+Dans les **Settings** du dépôt → **Pages** → Source : `main` branch, dossier `/ (root)`.
+
+Votre app sera disponible sur `https://VOTRE_USER.github.io/mesrecus/`
+
+### 3. Configurer la Freebox
+
+> ⚠️ La première connexion doit se faire **sur votre réseau Freebox (wifi)**.
+
+1. Sur `mafreebox.freebox.fr` → Paramètres → Gestion des accès → **Accès à distance** → Activer
+2. Notez votre adresse distante : `https://xxxxxxxx.fbxos.fr`
+3. Ouvrez l'app sur votre téléphone (en wifi Freebox)
+4. Cliquez **📦 Freebox NAS** → entrez l'adresse → validez sur la télécommande Freebox
+5. ✅ Connexion établie — fonctionne ensuite depuis partout (4G, autre réseau)
+
+---
+
+## Structure des fichiers
+
+```
+mesrecus/
+├── index.html        # Application principale
+├── manifest.json     # Manifest PWA
+├── sw.js             # Service Worker (cache offline)
+├── icons/
+│   ├── icon-16.png
+│   ├── icon-32.png
+│   ├── icon-180.png  # Apple Touch Icon
+│   ├── icon-192.png  # Android
+│   └── icon-512.png  # Android large
+└── README.md
+```
+
+---
+
+## Utilisation fiscale
+
+Les reçus de repas sont déductibles en frais réels si :
+- Le repas est pris hors du domicile pour raison professionnelle
+- Le montant dépasse le forfait repas de l'administration fiscale (~5 €)
+- Vous conservez les justificatifs (photos des reçus)
+
+L'export CSV fournit la liste complète avec dates, lieux, montants et motifs — directement utilisable pour votre déclaration ou votre comptable.
+
+---
+
+## Confidentialité
+
+- Aucune donnée n'est envoyée à un serveur tiers
+- Les reçus sont stockés localement dans le navigateur
+- La synchronisation Freebox utilise uniquement l'**API officielle Freebox OS** (communication chiffrée HTTPS, directement vers votre box)
+- Le token d'authentification Freebox est stocké localement dans le navigateur
+
+---
+
+## Licence
+
+MIT — libre d'utilisation et de modification.
