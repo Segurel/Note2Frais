@@ -132,70 +132,368 @@ textarea{resize:vertical;min-height:55px}
 .ocr-loading .spin{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 .ocr-badge{display:inline-flex;align-items:center;gap:.3rem;background:#e8f5ee;color:var(--success);font-size:.68rem;padding:2px 8px;border-radius:10px;margin-left:.4rem;font-weight:500}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── ÉCRAN SETUP ── */
+#screen-setup{display:flex;flex-direction:column;min-height:100vh;background:var(--ink)}
+.setup-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem 1.5rem;text-align:center}
+.setup-logo{font-family:"DM Serif Display",serif;font-size:2.8rem;color:var(--paper);margin-bottom:.3rem}
+.setup-sub{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:3rem}
+.setup-cards{width:100%;max-width:420px;display:flex;flex-direction:column;gap:1rem;padding:0 0 2rem}
+.scard{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:16px;padding:1.2rem 1.4rem;display:flex;align-items:center;gap:1rem;transition:all .3s}
+.scard.done{background:rgba(58,125,90,.15);border-color:rgba(58,125,90,.4)}
+.scard-ico{font-size:1.6rem;flex-shrink:0;width:40px;text-align:center}
+.scard-body{flex:1;min-width:0}
+.scard-title{font-size:.9rem;font-weight:600;color:var(--paper);margin-bottom:.15rem}
+.scard-desc{font-size:.72rem;color:#a09880;line-height:1.4}
+.scard-status{flex-shrink:0}
+.scard-btn{padding:.45rem 1rem;border-radius:8px;border:none;font-family:"DM Sans",sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .2s}
+.scard-btn.connect{background:var(--gdrive);color:#fff}
+.scard-btn.connect.api{background:var(--accent)}
+.scard-btn.connect:hover{opacity:.88}
+.scard-btn.linked{background:rgba(58,125,90,.25);color:#6ecf9a;border:1px solid rgba(58,125,90,.3);cursor:default}
+.setup-footer{padding:1.5rem 2rem 2.5rem;text-align:center}
+.setup-skip{font-size:.75rem;color:#6a6458;cursor:pointer;text-decoration:underline;background:none;border:none;font-family:"DM Sans",sans-serif}
+.setup-skip:hover{color:#a09880}
+
+/* ── ÉCRAN APP ── */
+#screen-app{display:none;flex-direction:column;min-height:100vh}
+.app-header{background:var(--ink);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3)}
+.app-logo{font-family:"DM Serif Display",serif;font-size:1.3rem;color:var(--paper)}
+.app-logo span{color:var(--gold)}
+.app-hright{display:flex;align-items:center;gap:.8rem}
+.app-stat{text-align:right}
+.sv{font-family:"DM Serif Display",serif;font-size:1.15rem;color:var(--gold);display:block}
+.sl{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:#a09880}
+.app-settings{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:var(--paper);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.app-settings:hover{background:rgba(255,255,255,.15)}
+
+/* ── ONGLETS ── */
+.tab-bar{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--paper);border-top:1.5px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.6rem .5rem;cursor:pointer;border:none;background:transparent;font-family:"DM Sans",sans-serif;color:var(--muted);transition:color .2s;gap:.2rem}
+.tab:hover{color:var(--ink)}
+.tab.ac{color:var(--accent)}
+.tab-ico{font-size:1.3rem;line-height:1}
+.tab-lbl{font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+
+/* ── CONTENU ONGLETS ── */
+.tab-content{display:none;flex:1;padding:1.5rem 1.2rem 5rem;max-width:700px;margin:0 auto;width:100%;animation:fadein .2s ease}
+.tab-content.ac{display:block}
+
+/* ── SCANNER ── */
+.scan-zone{background:var(--ink);border-radius:18px;padding:2.2rem;text-align:center;cursor:pointer;transition:all .3s;margin-bottom:1.5rem;position:relative;overflow:hidden;border:2px dashed #3a3530}
+.scan-zone:hover,.scan-zone:active{background:#252018;border-color:var(--accent);transform:translateY(-1px);box-shadow:var(--shlg)}
+.scan-ico{font-size:2.5rem;margin-bottom:.6rem;display:block}
+.scan-txt{font-family:"DM Serif Display",serif;font-size:1.3rem;color:var(--paper);margin-bottom:.3rem}
+.scan-sub{font-size:.78rem;color:#6a6458}
+.syncbar{display:none;align-items:center;gap:.6rem;padding:.6rem 1rem;background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-bottom:1.2rem;font-size:.78rem;color:var(--muted)}
+.syncbar.on{display:flex}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .3s}
+.sdot.sy{background:var(--gold);animation:pulse 1s infinite}
+.sdot.ok{background:var(--success)}
+.sdot.er{background:#c0392b}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.stext{flex:1}
+.sbtn{padding:.3rem .7rem;background:var(--ink);color:var(--paper);border:none;border-radius:6px;font-size:.72rem;cursor:pointer}
+.sbtn:hover{background:var(--accent)}
+.scan-info{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:1rem 1.2rem;font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:1rem}
+.scan-info strong{color:var(--ink)}
+
+/* ── REÇUS ── */
+.recus-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:1rem}
+.recus-title{font-family:"DM Serif Display",serif;font-size:1.2rem}
+.recus-cnt{font-size:.72rem;color:var(--muted)}
+.ybar{display:flex;align-items:center;gap:.5rem;margin-bottom:.8rem;flex-wrap:wrap}
+.ylbl{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:.2rem}
+.ybtn{padding:.28rem .8rem;border:1.5px solid var(--border);background:transparent;color:var(--muted);border-radius:20px;font-family:"DM Sans",sans-serif;font-size:.75rem;cursor:pointer;transition:all .2s}
+.ybtn:hover{border-color:var(--accent);color:var(--accent)}
+.ybtn.ac{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.exbar{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:.9rem 1.2rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;gap:1rem;flex-wrap:wrap}
+.exinfo{font-size:.75rem;color:var(--muted);line-height:1.5}
+.exinfo strong{color:var(--ink)}
+.exbtn{padding:.5rem 1rem;background:var(--ink);color:var(--paper);border:none;border-radius:8px;font-family:"DM Sans",sans-serif;font-size:.75rem;cursor:pointer;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:.4rem}
+.exbtn:hover{background:var(--accent)}
+
+/* ── CARTES REÇUS ── */
+.mg{margin-bottom:1.5rem}
+.mth{font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding-bottom:.4rem;border-bottom:1px solid var(--border);margin-bottom:.6rem;display:flex;justify-content:space-between}
+.mtt{font-weight:600;color:var(--accent)}
+.rlist{display:flex;flex-direction:column;gap:.5rem}
+.rcard{background:#fff;border-radius:14px;overflow:hidden;border:1.5px solid var(--border);cursor:pointer;transition:all .2s;display:flex;align-items:stretch}
+.rcard:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:var(--sh)}
+.rcard:active{transform:scale(.99)}
+.rthumb{width:72px;min-height:72px;flex-shrink:0;object-fit:cover;display:block;background:var(--cream)}
+.rnthumb{width:72px;min-height:72px;flex-shrink:0;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:1.8rem}
+.rbody{padding:.65rem 1rem;flex:1;display:flex;flex-direction:column;justify-content:center;gap:.15rem;min-width:0}
+.rplace{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rdate{font-size:.72rem;color:var(--muted)}
+.rnotes{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
+.rright{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:.65rem 1rem;gap:.3rem;flex-shrink:0}
+.ramt{font-family:"DM Serif Display",serif;font-size:1.1rem;color:var(--accent)}
+.rdrive{background:var(--gdrive);color:#fff;font-size:.58rem;padding:2px 6px;border-radius:10px}
+.rbadge{background:var(--cream);color:var(--muted);font-size:.58rem;letter-spacing:.08em;padding:2px 6px;border-radius:10px}
+.rchev{color:var(--border);font-size:.9rem}
+.empty{text-align:center;padding:3rem 2rem;color:var(--muted)}
 .eico{font-size:2.8rem;margin-bottom:.9rem}
-.etit{font-family:"DM Serif Display",serif;font-size:1.3rem;color:var(--ink);margin-bottom:.5rem}
+.etit{font-family:"DM Serif Display",serif;font-size:1.2rem;color:var(--ink);margin-bottom:.5rem}
 .etxt{font-size:.82rem;line-height:1.6}
-.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--success);color:#fff;padding:.7rem 1.4rem;border-radius:30px;font-size:.82rem;opacity:0;transition:all .3s;z-index:1000;font-weight:500;pointer-events:none}
+
+/* ── MODALS ── */
+.mo{position:fixed;inset:0;background:rgba(20,16,12,.85);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.mo.on{opacity:1;pointer-events:all}
+.mbox{background:var(--paper);border-radius:20px;padding:1.8rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;transform:translateY(20px);transition:transform .3s;box-shadow:var(--shlg)}
+.mo.on .mbox{transform:translateY(0)}
+.mhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.3rem}
+.mtit{font-family:"DM Serif Display",serif;font-size:1.3rem}
+.xcbtn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--muted);transition:all .2s}
+.xcbtn:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.wbox{background:var(--cream);border-radius:12px;padding:1.5rem;text-align:center;margin:1rem 0}
+.wico{font-size:2.5rem;margin-bottom:.5rem}
+.wtxt{font-size:.82rem;color:var(--muted);line-height:1.5}
+.wtxt strong{color:var(--ink)}
+.fg{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.75rem}
+label{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+input,textarea{padding:.6rem .85rem;border:1.5px solid var(--border);border-radius:8px;font-family:"DM Sans",sans-serif;font-size:.88rem;background:#fff;color:var(--ink);transition:border-color .2s;outline:none}
+input:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:55px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+.frow.full{grid-template-columns:1fr}
+.bp{width:100%;padding:.85rem;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:"DM Serif Display",serif;font-size:1.05rem;cursor:pointer;transition:all .2s;margin-top:.5rem}
+.bp:hover{background:#a8421a}
+.bgdrive{width:100%;padding:.85rem;background:var(--gdrive);color:#fff;border:none;border-radius:10px;font-family:"DM Serif Display",serif;font-size:1.05rem;cursor:pointer;transition:all .2s;margin-top:.5rem;display:flex;align-items:center;justify-content:center;gap:.6rem}
+.bgdrive:hover{background:#1557b0}
+.bs{width:100%;padding:.75rem;background:transparent;color:var(--ink);border:1.5px solid var(--border);border-radius:10px;font-family:"DM Sans",sans-serif;font-size:.88rem;cursor:pointer;transition:all .2s;margin-top:.5rem}
+.bs:hover{border-color:var(--ink)}
+.bd{width:100%;padding:.65rem;background:transparent;color:#c0392b;border:1.5px solid #c0392b;border-radius:8px;font-family:"DM Sans",sans-serif;font-size:.82rem;cursor:pointer;margin-top:.9rem;transition:all .2s}
+.bd:hover{background:#c0392b;color:#fff}
+.previmg{width:100%;max-height:200px;object-fit:contain;border-radius:10px;background:var(--cream);border:1.5px solid var(--border);margin-bottom:1.1rem;display:block}
+.dimg{width:100%;max-height:280px;object-fit:contain;border-radius:10px;background:var(--cream);border:1.5px solid var(--border);margin-bottom:.9rem;cursor:pointer}
+.drow{display:flex;justify-content:space-between;align-items:baseline;padding:.55rem 0;border-bottom:1px solid var(--cream)}
+.dk{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.dv{font-weight:500;font-size:.88rem;text-align:right;max-width:65%}
+.damt{font-family:"DM Serif Display",serif;font-size:1.9rem;color:var(--accent);text-align:center;margin:.9rem 0}
+.fso{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;cursor:zoom-out}
+.fso.on{opacity:1;pointer-events:all}
+.fso img{max-width:95vw;max-height:95vh;object-fit:contain}
+#crop-canvas{display:block;max-width:100%;border-radius:8px;cursor:crosshair;touch-action:none}
+#mo-crop .mbox{max-width:580px}
+.crop-hint{font-size:.75rem;color:var(--muted);text-align:center;margin-bottom:.8rem}
+.crop-btns{display:flex;gap:.6rem;margin-top:.9rem}
+.crop-btns button{flex:1}
+.ocr-loading{display:flex;align-items:center;gap:.7rem;background:var(--cream);border-radius:10px;padding:.9rem 1.1rem;margin-bottom:1rem;font-size:.82rem;color:var(--muted)}
+.ocr-loading .spin{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.ocr-badge{display:inline-flex;align-items:center;gap:.3rem;background:#e8f5ee;color:var(--success);font-size:.68rem;padding:2px 8px;border-radius:10px;margin-left:.4rem;font-weight:500}
+.toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%) translateY(20px);background:var(--success);color:#fff;padding:.7rem 1.4rem;border-radius:30px;font-size:.82rem;opacity:0;transition:all .3s;z-index:1000;font-weight:500;pointer-events:none}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.er{background:#c0392b}
-@media(max-width:600px){header{padding:1rem}main{padding:1rem}.frow{grid-template-columns:1fr}.rgrid{grid-template-columns:repeat(2,1fr)}}
+
+/* ── PARAMÈTRES ── */
+.params-section{margin-bottom:1.5rem}
+.params-title{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:.8rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+.params-row{background:#fff;border-radius:12px;border:1.5px solid var(--border);padding:1rem 1.2rem;display:flex;align-items:center;gap:1rem;margin-bottom:.5rem}
+.params-ico{font-size:1.3rem;flex-shrink:0}
+.params-body{flex:1;min-width:0}
+.params-label{font-size:.85rem;font-weight:600;margin-bottom:.1rem}
+.params-desc{font-size:.72rem;color:var(--muted)}
+.params-action{flex-shrink:0}
+.params-btn{padding:.4rem .9rem;border-radius:8px;border:none;font-family:"DM Sans",sans-serif;font-size:.75rem;font-weight:500;cursor:pointer;transition:all .2s}
+.params-btn.edit{background:var(--cream);color:var(--ink)}
+.params-btn.edit:hover{background:var(--border)}
+.params-btn.danger{background:transparent;color:#c0392b;border:1px solid #c0392b}
+.params-btn.danger:hover{background:#c0392b;color:#fff}
+.params-btn.go{background:var(--gdrive);color:#fff}
+.params-btn.go.api{background:var(--accent)}
+.params-btn.go:hover{opacity:.88}
+
+@media(max-width:600px){.frow{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <div class="logo-title">Note2Frais</div>
-    <div class="logo-sub">Frais de repas &middot; Impots</div>
-  </div>
-  <div class="hright">
-    <div class="hstats">
-      <div class="stat"><span class="sv" id="stat-total">0,00 EUR</span><span class="sl">Total</span></div>
-      <div class="stat"><span class="sv" id="stat-count">0</span><span class="sl">Recus</span></div>
+<!-- ══════════════════════════════════════
+     ÉCRAN 1 — SETUP
+══════════════════════════════════════ -->
+<div id="screen-setup">
+  <div class="setup-hero">
+    <div class="setup-logo">Note2Frais</div>
+    <div class="setup-sub">Frais de repas &middot; Impôts</div>
+    <div class="setup-cards" id="setup-cards">
+
+      <!-- Google Drive -->
+      <div class="scard" id="scard-drive">
+        <div class="scard-ico">☁️</div>
+        <div class="scard-body">
+          <div class="scard-title">Google Drive</div>
+          <div class="scard-desc" id="scard-drive-desc">Sauvegarde automatique de vos reçus</div>
+        </div>
+        <div class="scard-status">
+          <button class="scard-btn connect" id="scard-drive-btn" onclick="handleDriveBtn()">Connecter</button>
+        </div>
+      </div>
+
+      <!-- Clé API -->
+      <div class="scard" id="scard-api">
+        <div class="scard-ico">🤖</div>
+        <div class="scard-body">
+          <div class="scard-title">IA Anthropic</div>
+          <div class="scard-desc" id="scard-api-desc">Analyse automatique des tickets</div>
+        </div>
+        <div class="scard-status">
+          <button class="scard-btn connect api" id="scard-api-btn" onclick="openApiKeyModal()">Configurer</button>
+        </div>
+      </div>
+
     </div>
-    <button class="gdrive-btn co" id="gdrive-btn" onclick="handleDriveBtn()">&#9654; Google Drive</button>
-    <button class="gdrive-btn co" onclick="openApiKeyModal()" title="Configurer clé API" style="padding:.5rem .75rem">⚙️</button>
   </div>
-</header>
+  <div class="setup-footer">
+    <button class="setup-skip" onclick="goToApp()">Continuer sans configurer →</button>
+  </div>
+</div>
 
-<main>
-  <div class="syncbar" id="syncbar">
-    <div class="sdot" id="sdot"></div>
-    <span class="stext" id="stxt">Google Drive connecte</span>
-    <button class="sbtn" onclick="syncAll()">Synchroniser</button>
-  </div>
+<!-- ══════════════════════════════════════
+     ÉCRAN 2 — APPLICATION
+══════════════════════════════════════ -->
+<div id="screen-app">
 
-  <div class="capzone" onclick="document.getElementById('fi').click()">
-    <span class="capicon">&#128247;</span>
-    <div class="captxt">Photographier un recu</div>
-    <div class="capsub">Photo ou import &middot; Sauvegarde automatique sur Google Drive</div>
-    <input type="file" id="fi" accept="image/*">
-  </div>
-
-  <div class="ybar">
-    <span class="ylbl">Année :</span>
-    <div id="yfilters"></div>
-  </div>
-  <div class="ybar" id="mbar" style="display:none">
-    <span class="ylbl">Mois :</span>
-    <div id="mfilters"></div>
-  </div>
-
-  <div class="exbar">
-    <div class="exinfo">
-      <strong>Justificatif fiscal</strong> &mdash; Photos sauvegardées dans
-      <code style="background:var(--cream);padding:1px 5px;border-radius:3px;font-size:.72rem">Note2Frais/</code>
-      sur Google Drive &mdash; Export Excel pour vos frais réels
+  <!-- Header -->
+  <div class="app-header">
+    <div class="app-logo">Note2<span>Frais</span></div>
+    <div class="app-hright">
+      <div class="app-stat">
+        <span class="sv" id="stat-total">0,00 €</span>
+        <span class="sl" id="stat-label">Total</span>
+      </div>
+      <button class="app-settings" onclick="showTab('params')" title="Paramètres">⚙️</button>
     </div>
-    <button class="exbtn" onclick="exportCSV()">&#8595; Export Excel (.xlsx)</button>
   </div>
 
-  <div class="sech">
-    <span class="setit">Mes recus</span>
-    <span class="secnt" id="fcnt"></span>
+  <!-- Contenu Scanner -->
+  <div class="tab-content ac" id="tab-scanner">
+    <div class="syncbar" id="syncbar">
+      <div class="sdot" id="sdot"></div>
+      <span class="stext" id="stxt">Google Drive connecté</span>
+      <button class="sbtn" onclick="syncAll()">Sync</button>
+    </div>
+    <div class="scan-zone" onclick="document.getElementById('fi').click()">
+      <span class="scan-ico">📷</span>
+      <div class="scan-txt">Photographier un reçu</div>
+      <div class="scan-sub">Photo ou import &middot; Analyse IA automatique</div>
+      <input type="file" id="fi" accept="image/*">
+    </div>
+    <div class="scan-info">
+      <strong>Comment ça marche</strong><br>
+      Prenez en photo votre ticket — l'IA extrait automatiquement la date, le montant et le lieu. Vérifiez et ajoutez un motif professionnel avant d'enregistrer.
+    </div>
   </div>
-  <div id="rcont"></div>
-</main>
+
+  <!-- Contenu Reçus -->
+  <div class="tab-content" id="tab-recus">
+    <div class="recus-header">
+      <span class="recus-title">Mes reçus</span>
+      <span class="recus-cnt" id="fcnt"></span>
+    </div>
+    <div class="ybar">
+      <span class="ylbl">Année</span>
+      <div id="yfilters"></div>
+    </div>
+    <div class="ybar" id="mbar" style="display:none">
+      <span class="ylbl">Mois</span>
+      <div id="mfilters"></div>
+    </div>
+    <div class="exbar">
+      <div class="exinfo">
+        <strong>Export fiscal</strong> — Dossier <code style="background:var(--cream);padding:1px 5px;border-radius:3px;font-size:.7rem">Note2Frais/</code> sur Drive
+      </div>
+      <button class="exbtn" onclick="exportCSV()">↓ Excel</button>
+    </div>
+    <div id="rcont"></div>
+  </div>
+
+  <!-- Contenu Paramètres -->
+  <div class="tab-content" id="tab-params">
+    <div class="params-section">
+      <div class="params-title">Connexions</div>
+      <div class="params-row">
+        <div class="params-ico">☁️</div>
+        <div class="params-body">
+          <div class="params-label">Google Drive</div>
+          <div class="params-desc" id="params-drive-desc">Non connecté</div>
+        </div>
+        <div class="params-action">
+          <button class="params-btn go" id="params-drive-btn" onclick="handleDriveBtn()">Connecter</button>
+        </div>
+      </div>
+      <div class="params-row">
+        <div class="params-ico">🤖</div>
+        <div class="params-body">
+          <div class="params-label">IA Anthropic</div>
+          <div class="params-desc" id="params-api-desc">Non configurée</div>
+        </div>
+        <div class="params-action">
+          <button class="params-btn edit" id="params-api-btn" onclick="openApiKeyModal()">Configurer</button>
+        </div>
+      </div>
+    </div>
+    <div class="params-section">
+      <div class="params-title">Données</div>
+      <div class="params-row">
+        <div class="params-ico">🗑️</div>
+        <div class="params-body">
+          <div class="params-label">Effacer les données locales</div>
+          <div class="params-desc">Supprime les reçus de cet appareil</div>
+        </div>
+        <div class="params-action">
+          <button class="params-btn danger" onclick="clearData()">Effacer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barre d'onglets -->
+  <div class="tab-bar">
+    <button class="tab ac" id="tab-btn-scanner" onclick="showTab('scanner')">
+      <span class="tab-ico">📷</span>
+      <span class="tab-lbl">Scanner</span>
+    </button>
+    <button class="tab" id="tab-btn-recus" onclick="showTab('recus')">
+      <span class="tab-ico">🧾</span>
+      <span class="tab-lbl">Reçus</span>
+    </button>
+    <button class="tab" id="tab-btn-params" onclick="showTab('params')">
+      <span class="tab-ico">⚙️</span>
+      <span class="tab-lbl">Réglages</span>
+    </button>
+  </div>
+
+</div><!-- fin screen-app -->
+
+<!-- MODAL AJOUT -->
+<div class="mo" id="mo-add">
+  <div class="mbox">
+    <div class="mhd"><span class="mtit">Nouveau reçu</span><button class="xcbtn" onclick="closeAdd()">&#10005;</button></div>
+    <div id="ocr-status" style="display:none"></div>
+    <img id="previmg" class="previmg" src="" alt="" style="display:none">
+    <div class="frow">
+      <div class="fg"><label>Date</label><input type="date" id="f-date"></div>
+      <div class="fg"><label>Montant (EUR)</label><input type="number" id="f-amt" step="0.01" placeholder="12.50"></div>
+    </div>
+    <div class="frow full">
+      <div class="fg"><label>Lieu / Restaurant</label><input type="text" id="f-place" placeholder="Brasserie du Marché"></div>
+    </div>
+    <div class="frow full">
+      <div class="fg"><label>Motif professionnel (optionnel)</label><textarea id="f-notes" placeholder="Déjeuner de travail..."></textarea></div>
+    </div>
+    <button class="bp" onclick="saveRec()">Enregistrer</button>
+  </div>
+</div>
+
+<!-- MODAL DETAIL -->
+<div class="mo" id="mo-det">
+  <div class="mbox">
+    <div class="mhd"><span class="mtit">Détail du reçu</span><button class="xcbtn" onclick="closeDet()">&#10005;</button></div>
+    <div id="detcont"></div>
+  </div>
+</div>
 
 <!-- MODAL GOOGLE DRIVE -->
 <div class="mo" id="mo-drive">
@@ -205,10 +503,10 @@ textarea{resize:vertical;min-height:55px}
       <button class="xcbtn" onclick="closeDriveModal()">&#10005;</button>
     </div>
     <div class="wbox">
-      <div class="wico">&#9729;</div>
+      <div class="wico">☁️</div>
       <div class="wtxt">
-        Connectez votre Google Drive pour sauvegarder automatiquement vos photos de recus.<br><br>
-        Un dossier <strong>Note2Frais/</strong> sera cree sur votre Drive.
+        Connectez votre Google Drive pour sauvegarder automatiquement vos photos de reçus.<br><br>
+        Un dossier <strong>Note2Frais/</strong> sera créé sur votre Drive.
       </div>
     </div>
     <button class="bgdrive" onclick="connectDrive()">
@@ -219,53 +517,23 @@ textarea{resize:vertical;min-height:55px}
   </div>
 </div>
 
-<!-- MODAL AJOUT -->
-<div class="mo" id="mo-add">
-  <div class="mbox">
-    <div class="mhd"><span class="mtit">Nouveau recu</span><button class="xcbtn" onclick="closeAdd()">&#10005;</button></div>
-    <div id="ocr-status" style="display:none"></div>
-    <img id="previmg" class="previmg" src="" alt="" style="display:none">
-    <div class="frow">
-      <div class="fg"><label>Date</label><input type="date" id="f-date"></div>
-      <div class="fg"><label>Montant (EUR)</label><input type="number" id="f-amt" step="0.01" placeholder="12.50"></div>
-    </div>
-    <div class="frow full">
-      <div class="fg"><label>Lieu / Restaurant</label><input type="text" id="f-place" placeholder="Brasserie du Marche"></div>
-    </div>
-    <div class="frow full">
-      <div class="fg"><label>Motif professionnel (optionnel)</label><textarea id="f-notes" placeholder="Dejeuner de travail..."></textarea></div>
-    </div>
-    <button class="bp" onclick="saveRec()">Enregistrer</button>
-  </div>
-</div>
-
-<!-- MODAL DETAIL -->
-<div class="mo" id="mo-det">
-  <div class="mbox">
-    <div class="mhd"><span class="mtit">Detail du recu</span><button class="xcbtn" onclick="closeDet()">&#10005;</button></div>
-    <div id="detcont"></div>
-  </div>
-</div>
-
 <!-- MODAL CONFIG API -->
 <div class="mo" id="mo-apikey">
   <div class="mbox">
-    <div class="mhd">
-      <span class="mtit">Configuration OCR</span>
-    </div>
+    <div class="mhd"><span class="mtit">Clé API Anthropic</span></div>
     <div class="wbox">
       <div class="wico">🔑</div>
       <div class="wtxt">
-        Pour analyser vos tickets automatiquement, entrez votre clé API Anthropic.<br><br>
-        Elle sera stockée <strong>uniquement sur votre appareil</strong> et ne transite jamais par un serveur.
+        Entrez votre clé API pour activer l'analyse automatique des tickets.<br><br>
+        Elle est stockée <strong>uniquement sur votre appareil</strong>.
       </div>
     </div>
     <div class="fg" style="margin-top:.8rem">
-      <label>Clé API Anthropic</label>
+      <label>Clé API</label>
       <input type="password" id="apikey-input" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
     <button class="bp" onclick="saveApiKey()">Enregistrer</button>
-    <button class="bs" onclick="skipApiKey()">Plus tard</button>
+    <button class="bs" onclick="skipApiKey()">Annuler</button>
   </div>
 </div>
 
@@ -384,7 +652,7 @@ textarea{resize:vertical;min-height:55px}
       saveToken(params.access_token, parseInt(params.expires_in || "3600"));
       closeDriveModal();
       updateBtn();
-      toast("Google Drive connecte !");
+      toast("Google Drive connecté !");
       ensureFolder().then(function() { syncAll(); });
     }
   }
@@ -572,23 +840,109 @@ textarea{resize:vertical;min-height:55px}
     document.getElementById("stxt").textContent = txt;
   }
 
-  // ---- BOUTON ----
+  // ---- NAVIGATION ÉCRANS ----
+  function updateSetupCards() {
+    var driveOk = isTokenValid();
+    var apiOk = !!anthropicKey;
+
+    // Setup screen cards
+    var sc = document.getElementById("scard-drive");
+    var sb = document.getElementById("scard-drive-btn");
+    var sd = document.getElementById("scard-drive-desc");
+    if (sc && sb && sd) {
+      if (driveOk) {
+        sc.className = "scard done";
+        sb.className = "scard-btn linked";
+        sb.textContent = "✓ Connecté";
+        sd.textContent = "Sauvegarde activée";
+      } else {
+        sc.className = "scard";
+        sb.className = "scard-btn connect";
+        sb.textContent = "Connecter";
+        sd.textContent = "Sauvegarde automatique de vos reçus";
+      }
+    }
+    var ac = document.getElementById("scard-api");
+    var ab = document.getElementById("scard-api-btn");
+    var ad = document.getElementById("scard-api-desc");
+    if (ac && ab && ad) {
+      if (apiOk) {
+        ac.className = "scard done";
+        ab.className = "scard-btn linked";
+        ab.textContent = "✓ Configurée";
+        ad.textContent = "Analyse IA activée";
+      } else {
+        ac.className = "scard";
+        ab.className = "scard-btn connect api";
+        ab.textContent = "Configurer";
+        ad.textContent = "Analyse automatique des tickets";
+      }
+    }
+
+    // Params screen
+    var pb = document.getElementById("params-drive-btn");
+    var pd = document.getElementById("params-drive-desc");
+    if (pb && pd) {
+      if (driveOk) { pb.textContent = "Déconnecter"; pb.className = "params-btn danger"; pd.textContent = "Connecté — dossier Note2Frais/"; }
+      else { pb.textContent = "Connecter"; pb.className = "params-btn go"; pd.textContent = "Non connecté"; }
+    }
+    var apb = document.getElementById("params-api-btn");
+    var apd = document.getElementById("params-api-desc");
+    if (apb && apd) {
+      if (apiOk) { apb.textContent = "Modifier"; apb.className = "params-btn edit"; apd.textContent = "Clé configurée"; }
+      else { apb.textContent = "Configurer"; apb.className = "params-btn edit"; apd.textContent = "Non configurée"; }
+    }
+
+    // Passage automatique vers l'app si les deux sont configurés
+    if (driveOk && apiOk) {
+      setTimeout(goToApp, 600);
+    }
+  }
+
+  window.goToApp = function() {
+    document.getElementById("screen-setup").style.display = "none";
+    document.getElementById("screen-app").style.display = "flex";
+    document.getElementById("screen-app").style.flexDirection = "column";
+    render();
+  };
+
+  function initScreen() {
+    // Si déjà configuré au démarrage, aller direct à l'app
+    if (isTokenValid() || anthropicKey || receipts.length > 0) {
+      goToApp();
+    }
+    updateSetupCards();
+  }
+
+  window.showTab = function(name) {
+    ["scanner","recus","params"].forEach(function(t) {
+      document.getElementById("tab-"+t).className = "tab-content" + (t === name ? " ac" : "");
+      document.getElementById("tab-btn-"+t).className = "tab" + (t === name ? " ac" : "");
+    });
+    if (name === "recus") render();
+  };
+
+  window.clearData = function() {
+    if (!confirm("Supprimer tous les reçus de cet appareil ? (Les fichiers sur Drive ne sont pas supprimés)")) return;
+    receipts = [];
+    saveLocal();
+    render();
+    toast("Données effacées");
+  };
+
+  // ---- BOUTON (conservé pour compatibilité) ----
   function updateBtn() {
-    var btn = document.getElementById("gdrive-btn");
+    updateSetupCards();
     if (isTokenValid()) {
-      btn.className = "gdrive-btn cd";
-      btn.innerHTML = '<span class="gdot"></span> Google Drive';
-      setSync("ok", "Google Drive connecte");
+      setSync("ok", "Google Drive connecté");
     } else {
-      btn.className = "gdrive-btn co";
-      btn.innerHTML = "&#9654; Google Drive";
       document.getElementById("syncbar").className = "syncbar";
     }
   }
 
   window.handleDriveBtn = function() {
     if (isTokenValid()) {
-      if (confirm("Deconnecter Google Drive ?")) {
+      if (confirm("Déconnecter Google Drive ?")) {
         accessToken = null; tokenExpiry = 0; folderId = null;
         try { localStorage.removeItem("gd_token"); localStorage.removeItem("gd_expiry"); localStorage.removeItem("gd_folder_id"); } catch(e) {}
         document.getElementById("syncbar").className = "syncbar";
@@ -918,6 +1272,7 @@ textarea{resize:vertical;min-height:55px}
     try { localStorage.setItem("anthropic_key", val); } catch(e) {}
     document.getElementById("mo-apikey").className = "mo";
     toast("Clé API enregistrée ✓");
+    updateSetupCards();
   };
 
   window.skipApiKey = function() {
@@ -1171,8 +1526,9 @@ textarea{resize:vertical;min-height:55px}
     var f = recusAnnee.filter(function(r) { return !selMonth || r.date.slice(5,7) === selMonth; });
 
     var tot = f.reduce(function(s, r) { return s + r.amount; }, 0);
-    document.getElementById("stat-total").textContent = tot.toFixed(2).replace(".", ",") + " EUR";
-    document.getElementById("stat-count").textContent = f.length;
+    document.getElementById("stat-total").textContent = tot.toFixed(2).replace(".", ",") + " €";
+    var statLabel = document.getElementById("stat-label");
+    if (statLabel) statLabel.textContent = f.length + " reçu" + (f.length !== 1 ? "s" : "");
     var periodeLbl = selMonth ? MOIS[parseInt(selMonth,10)-1] + " " + selYear : String(selYear);
     document.getElementById("fcnt").textContent = f.length + " recu" + (f.length !== 1 ? "s" : "") + " - " + tot.toFixed(2).replace(".", ",") + " EUR";
     var c = document.getElementById("rcont");
@@ -1211,9 +1567,9 @@ textarea{resize:vertical;min-height:55px}
   loadApiKey();
   handleRedirectReturn();
   updateBtn();
-  render();
+  initScreen();
   if (isTokenValid()) {
-    ensureFolder().then(function() { setSync("ok", "Google Drive connecte"); }).catch(function(){});
+    ensureFolder().then(function() { setSync("ok", "Google Drive connecté"); }).catch(function(){});
   }
 })();
 </script>
