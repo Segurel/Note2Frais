@@ -976,7 +976,7 @@ textarea{resize:vertical;min-height:55px}
     })
     .then(function(r) {
       if (r.status === 401) { anthropicKey = null; try { localStorage.removeItem("anthropic_key"); } catch(e){} throw new Error("Clé API invalide"); }
-      if (!r.ok) throw new Error("Erreur API " + r.status);
+      if (!r.ok) return r.json().then(function(d){ throw new Error("API " + r.status + " : " + (d.error && d.error.message || JSON.stringify(d))); });
       return r.json();
     })
     .then(function(data) {
@@ -1000,9 +1000,12 @@ textarea{resize:vertical;min-height:55px}
       }
     })
     .catch(function(e) {
-      var msg = e.message === "Clé API invalide"
-        ? 'Clé API invalide — <a href="#" onclick="openApiKeyModal();return false" style="color:var(--accent)">reconfigurer</a>'
-        : "Analyse IA indisponible — remplissez manuellement";
+      var msg;
+      if (e.message === "Clé API invalide") {
+        msg = 'Clé API invalide — <a href="#" onclick="openApiKeyModal();return false" style="color:var(--accent)">reconfigurer</a>';
+      } else {
+        msg = "Erreur : " + e.message;
+      }
       st.innerHTML = '<div style="font-size:.78rem;color:var(--muted);padding:.4rem 0">' + msg + '</div>';
     });
   }
