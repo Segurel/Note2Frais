@@ -68,17 +68,22 @@ main{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
 .mg{margin-bottom:1.8rem}
 .mth{font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding-bottom:.4rem;border-bottom:1px solid var(--border);margin-bottom:.7rem;display:flex;justify-content:space-between}
 .mtt{font-weight:600;color:var(--accent)}
-.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.7rem}
-.rcard{background:#fff;border-radius:12px;overflow:hidden;border:1.5px solid var(--border);cursor:pointer;transition:all .2s;position:relative}
-.rcard:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--sh)}
-.rimg{width:100%;height:120px;object-fit:cover;display:block;background:var(--cream)}
-.rnimg{width:100%;height:120px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:var(--border)}
-.rbody{padding:.6rem .85rem}
-.rplace{font-weight:600;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rdate{font-size:.68rem;color:var(--muted);margin-top:.1rem}
-.ramt{font-family:"DM Serif Display",serif;font-size:1rem;color:var(--accent);margin-top:.15rem}
-.rbadge{position:absolute;top:7px;right:7px;background:var(--ink);color:var(--gold);font-size:.58rem;letter-spacing:.1em;padding:2px 6px;border-radius:10px}
-.rdrive{position:absolute;top:7px;left:7px;background:var(--gdrive);color:#fff;font-size:.58rem;padding:2px 6px;border-radius:10px}
+.rlist{display:flex;flex-direction:column;gap:.5rem}
+.rcard{background:#fff;border-radius:14px;overflow:hidden;border:1.5px solid var(--border);cursor:pointer;transition:all .2s;display:flex;align-items:stretch}
+.rcard:hover{border-color:var(--accent);transform:translateY(-1px);box-shadow:var(--sh)}
+.rcard:active{transform:scale(.99)}
+.rthumb{width:72px;min-height:72px;flex-shrink:0;object-fit:cover;display:block;background:var(--cream)}
+.rnthumb{width:72px;min-height:72px;flex-shrink:0;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:1.8rem}
+.rbody{padding:.65rem 1rem;flex:1;display:flex;flex-direction:column;justify-content:center;gap:.15rem;min-width:0}
+.rplace{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rdate{font-size:.72rem;color:var(--muted)}
+.rnotes{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
+.rright{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;padding:.65rem 1rem;gap:.3rem;flex-shrink:0}
+.ramt{font-family:"DM Serif Display",serif;font-size:1.1rem;color:var(--accent)}
+.rdrive{background:var(--gdrive);color:#fff;font-size:.58rem;padding:2px 6px;border-radius:10px}
+.rbadge{background:var(--cream);color:var(--muted);font-size:.58rem;letter-spacing:.08em;padding:2px 6px;border-radius:10px}
+.rchev{color:var(--border);font-size:.9rem}
+.empty{text-align:center;padding:3.5rem 2rem;color:var(--muted)}
 .mo{position:fixed;inset:0;background:rgba(20,16,12,.85);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .3s}
 .mo.on{opacity:1;pointer-events:all}
 .mbox{background:var(--paper);border-radius:20px;padding:1.8rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;transform:translateY(20px);transition:transform .3s;box-shadow:var(--shlg)}
@@ -894,8 +899,8 @@ textarea{resize:vertical;min-height:55px}
     document.getElementById("mo-crop").className = "mo";
     cropSrcImg = null;
     openAdd();
-    // Lancer l'OCR en arrière-plan si une image est disponible
-    if (curImg) runOcr(curImg);
+    // Lancer l'OCR uniquement si la clé est déjà disponible — ne pas ouvrir de modale ici
+    if (curImg && anthropicKey) runOcr(curImg);
   }
 
   // ---- CLÉ API ANTHROPIC ----
@@ -935,11 +940,6 @@ textarea{resize:vertical;min-height:55px}
 
   // ---- OCR VIA CLAUDE API ----
   function runOcr(imgData) {
-    if (!checkApiKey()) {
-      // Clé absente : ouvrir modale config, l'OCR sera ignoré cette fois
-      return;
-    }
-
     var st = document.getElementById("ocr-status");
     st.style.display = "block";
     st.innerHTML = '<div class="ocr-loading"><div class="spin"></div><span>Analyse du ticket par IA…</span></div>';
@@ -1074,7 +1074,7 @@ textarea{resize:vertical;min-height:55px}
   window.openDet = function(id) {
     var r = receipts.find(function(x) { return x.id === id; }); if (!r) return;
     var ds = ""; try { ds = new Date(r.date + "T12:00:00").toLocaleDateString("fr-FR", { weekday:"long", day:"numeric", month:"long", year:"numeric" }); } catch(e) { ds = r.date; }
-    var h = r.image ? '<img src="' + r.image + '" class="dimg" onclick="openFso(' + JSON.stringify(id) + ')">' : '<div style="background:var(--cream);border-radius:10px;height:110px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:.9rem">&#129413;</div>';
+    var h = r.image ? '<img src="' + r.image + '" class="dimg" onclick="openFso(' + JSON.stringify(id) + ')">' : '<div style="background:var(--cream);border-radius:10px;height:110px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:.9rem">🧾</div>';
     if (r.driveLink) h += '<a href="' + r.driveLink + '" target="_blank" style="display:inline-block;background:#e8f0fe;color:var(--gdrive);font-size:.72rem;padding:5px 10px;border-radius:6px;margin-bottom:.9rem;text-decoration:none">&#9729; Voir sur Google Drive</a>';
     h += '<div class="damt">' + r.amount.toFixed(2).replace(".", ",") + " EUR</div>";
     h += '<div class="drow"><span class="dk">Lieu</span><span class="dv">' + r.place + "</span></div>";
@@ -1175,7 +1175,7 @@ textarea{resize:vertical;min-height:55px}
     var periodeLbl = selMonth ? MOIS[parseInt(selMonth,10)-1] + " " + selYear : String(selYear);
     document.getElementById("fcnt").textContent = f.length + " recu" + (f.length !== 1 ? "s" : "") + " - " + tot.toFixed(2).replace(".", ",") + " EUR";
     var c = document.getElementById("rcont");
-    if (!f.length) { c.innerHTML = '<div class="empty"><div class="eico">&#129413;</div><div class="etit">Aucun recu pour ' + periodeLbl + '</div><div class="etxt">Photographiez votre premier recu.</div></div>'; return; }
+    if (!f.length) { c.innerHTML = '<div class="empty"><div class="eico">🧾</div><div class="etit">Aucun reçu pour ' + periodeLbl + '</div><div class="etxt">Photographiez votre premier reçu.</div></div>'; return; }
     var groups = {};
     f.forEach(function(r) { var k = r.date.slice(0,7); if (!groups[k]) groups[k] = []; groups[k].push(r); });
     var keys = Object.keys(groups).sort(function(a,b){return b>a?1:-1;});
@@ -1183,12 +1183,13 @@ textarea{resize:vertical;min-height:55px}
     keys.forEach(function(k) {
       var mrs = groups[k]; var mt = mrs.reduce(function(s,r){return s+r.amount;},0);
       var lbl = ""; try { lbl = new Date(k+"-01T12:00:00").toLocaleDateString("fr-FR",{month:"long",year:"numeric"}); lbl=lbl.charAt(0).toUpperCase()+lbl.slice(1); } catch(e){lbl=k;}
-      html += '<div class="mg"><div class="mth"><span>' + lbl + '</span><span class="mtt">' + mt.toFixed(2).replace(".",",") + " EUR</span></div><div class='rgrid'>";
+      html += '<div class="mg"><div class="mth"><span>' + lbl + '</span><span class="mtt">' + mt.toFixed(2).replace(".",",") + " EUR</span></div><div class='rlist'>";
       mrs.forEach(function(r) {
         var dl = ""; try { dl = new Date(r.date+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"short"}); } catch(e){dl=r.date;}
-        var im = r.image ? '<img class="rimg" src="'+r.image+'" loading="lazy">' : '<div class="rnimg">&#129413;</div>';
-        var dr = r.driveLink ? '<div class="rdrive">Drive</div>' : "";
-        html += '<div class="rcard" onclick="openDet('+JSON.stringify(r.id)+')">' + im + dr + '<div class="rbadge">OK</div><div class="rbody"><div class="rplace">'+r.place+'</div><div class="rdate">'+dl+'</div><div class="ramt">'+r.amount.toFixed(2).replace('.',',')+' EUR</div></div></div>';
+        var im = r.image ? '<img class="rthumb" src="'+r.image+'" loading="lazy">' : '<div class="rnthumb">🧾</div>';
+        var dr = r.driveLink ? '<span class="rdrive">Drive</span>' : '';
+        var notes = r.notes ? '<div class="rnotes">'+r.notes+'</div>' : '';
+        html += '<div class="rcard" onclick="openDet('+JSON.stringify(r.id)+')">'+im+'<div class="rbody"><div class="rplace">'+r.place+'</div><div class="rdate">'+dl+'</div>'+notes+'</div><div class="rright"><div class="ramt">'+r.amount.toFixed(2).replace('.',',')+' €</div>'+dr+'<div class="rchev">›</div></div></div>';
       });
       html += "</div></div>";
     });
