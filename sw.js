@@ -1,4 +1,4 @@
-const CACHE = "note2frais-v2";
+const CACHE = "note2frais-v3";
 const ASSETS = [
   "./",
   "./index.html",
@@ -32,8 +32,8 @@ self.addEventListener("activate", function(e) {
 });
 
 self.addEventListener("fetch", function(e) {
-  // Ne pas intercepter les requêtes Google API (OAuth, Drive)
-  if (e.request.url.includes("googleapis.com") || e.request.url.includes("accounts.google.com")) return;
+  // Ne pas intercepter les requêtes externes (Google API, Anthropic API)
+  if (e.request.url.includes("googleapis.com") || e.request.url.includes("accounts.google.com") || e.request.url.includes("anthropic.com")) return;
   e.respondWith(
     caches.match(e.request).then(function(cached) {
       if (cached) return cached;
