@@ -14,6 +14,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="window.cvReady=true"></script>
 <style>
 :root{--ink:#1a1612;--paper:#f5f0e8;--cream:#ede8dc;--accent:#c8522a;--gold:#b89a4e;--muted:#7a7268;--success:#3a7d5a;--border:#d4cfc4;--gdrive:#1a73e8;--sh:0 2px 16px rgba(26,22,18,.1);--shlg:0 8px 40px rgba(26,22,18,.15)}
@@ -122,6 +123,10 @@ textarea{resize:vertical;min-height:55px}
 .crop-btns{display:flex;gap:.6rem;margin-top:.9rem}
 .crop-btns button{flex:1}
 .empty{text-align:center;padding:3.5rem 2rem;color:var(--muted)}
+.ocr-loading{display:flex;align-items:center;gap:.7rem;background:var(--cream);border-radius:10px;padding:.9rem 1.1rem;margin-bottom:1rem;font-size:.82rem;color:var(--muted)}
+.ocr-loading .spin{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.ocr-badge{display:inline-flex;align-items:center;gap:.3rem;background:#e8f5ee;color:var(--success);font-size:.68rem;padding:2px 8px;border-radius:10px;margin-left:.4rem;font-weight:500}
+@keyframes spin{to{transform:rotate(360deg)}}
 .eico{font-size:2.8rem;margin-bottom:.9rem}
 .etit{font-family:"DM Serif Display",serif;font-size:1.3rem;color:var(--ink);margin-bottom:.5rem}
 .etxt{font-size:.82rem;line-height:1.6}
@@ -212,6 +217,7 @@ textarea{resize:vertical;min-height:55px}
 <div class="mo" id="mo-add">
   <div class="mbox">
     <div class="mhd"><span class="mtit">Nouveau recu</span><button class="xcbtn" onclick="closeAdd()">&#10005;</button></div>
+    <div id="ocr-status" style="display:none"></div>
     <img id="previmg" class="previmg" src="" alt="" style="display:none">
     <div class="frow">
       <div class="fg"><label>Date</label><input type="date" id="f-date"></div>
@@ -866,6 +872,100 @@ textarea{resize:vertical;min-height:55px}
     document.getElementById("mo-crop").className = "mo";
     cropSrcImg = null;
     openAdd();
+    // Lancer l'OCR en arrière-plan si une image est disponible
+    if (curImg) runOcr(curImg);
+  }
+
+  // ---- OCR TESSERACT ----
+  function runOcr(imgData) {
+    var st = document.getElementById("ocr-status");
+    st.style.display = "block";
+    st.innerHTML = '<div class="ocr-loading"><div class="spin"></div><span>Analyse du ticket en cours…</span></div>';
+
+    Tesseract.recognize(imgData, "fra", {})
+      .then(function(result) {
+        var text = result.data.text || "";
+        var extracted = parseTicket(text);
+        prefillForm(extracted);
+        var badges = "";
+        if (extracted.date)   badges += '<span class="ocr-badge">✓ Date</span>';
+        if (extracted.amount) badges += '<span class="ocr-badge">✓ Montant</span>';
+        if (extracted.place)  badges += '<span class="ocr-badge">✓ Lieu</span>';
+        if (badges) {
+          st.innerHTML = '<div style="font-size:.78rem;color:var(--muted);padding:.4rem 0">Pré-rempli par OCR ' + badges + '</div>';
+        } else {
+          st.innerHTML = '<div style="font-size:.78rem;color:var(--muted);padding:.4rem 0">OCR : aucune donnée détectée — vérifiez la photo</div>';
+        }
+      })
+      .catch(function() {
+        st.innerHTML = '<div style="font-size:.78rem;color:var(--muted);padding:.4rem 0">OCR indisponible — remplissez manuellement</div>';
+      });
+  }
+
+  function parseTicket(text) {
+    var lines = text.split(/\n/).map(function(l){ return l.trim(); }).filter(Boolean);
+    var result = { date: null, amount: null, place: null };
+
+    // --- Montant : chercher le plus grand montant plausible (total) ---
+    var amtRx = /\b(\d{1,3}(?:[.,]\d{3})*[.,]\d{2})\s*(?:€|EUR|eur)?\b/gi;
+    var amounts = [];
+    var m;
+    while ((m = amtRx.exec(text)) !== null) {
+      var v = parseFloat(m[1].replace(/\s/g,"").replace(",","."));
+      if (!isNaN(v) && v > 0 && v < 1000) amounts.push(v);
+    }
+    // Prendre le plus grand (vraisemblablement le total)
+    if (amounts.length) result.amount = Math.max.apply(null, amounts).toFixed(2);
+
+    // --- Date ---
+    var datePatterns = [
+      // jj/mm/aaaa ou jj-mm-aaaa
+      /\b(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})\b/,
+      // aaaa-mm-jj
+      /\b(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})\b/
+    ];
+    for (var i = 0; i < datePatterns.length; i++) {
+      var dm = text.match(datePatterns[i]);
+      if (dm) {
+        var day, mon, year;
+        if (i === 0) {
+          day = parseInt(dm[1]); mon = parseInt(dm[2]); year = parseInt(dm[3]);
+          if (year < 100) year += 2000;
+        } else {
+          year = parseInt(dm[1]); mon = parseInt(dm[2]); day = parseInt(dm[3]);
+        }
+        if (day>=1&&day<=31&&mon>=1&&mon<=12&&year>=2000&&year<=2099) {
+          result.date = year + "-" + String(mon).padStart(2,"0") + "-" + String(day).padStart(2,"0");
+          break;
+        }
+      }
+    }
+
+    // --- Lieu : heuristique sur les premières lignes non-numériques ---
+    var skipRx = /^\d|total|sous.total|tva|ticket|recu|merci|bienvenue|addition|montant|espece|carte|cb|visa|master|facture|siret|siren|tpe|^table|^couvert|^serveur|^date|^heure/i;
+    var candidates = [];
+    for (var j = 0; j < Math.min(lines.length, 12); j++) {
+      var l = lines[j];
+      if (l.length >= 3 && l.length <= 40 && !skipRx.test(l) && !/^\W+$/.test(l)) {
+        candidates.push(l);
+        if (candidates.length >= 2) break;
+      }
+    }
+    if (candidates.length) {
+      // Préférer la plus courte des 2 candidates (souvent le nom de l'enseigne)
+      result.place = candidates.reduce(function(a,b){ return a.length <= b.length ? a : b; });
+      // Nettoyage basique
+      result.place = result.place.replace(/[*#_=]{2,}/g,"").trim();
+      if (result.place.length < 2) result.place = null;
+    }
+
+    return result;
+  }
+
+  function prefillForm(data) {
+    if (data.date)   document.getElementById("f-date").value  = data.date;
+    if (data.amount) document.getElementById("f-amt").value   = data.amount;
+    if (data.place)  document.getElementById("f-place").value = data.place;
   }
 
   // ---- CAPTURE ----
@@ -900,6 +1000,7 @@ textarea{resize:vertical;min-height:55px}
   function openAdd() {
     document.getElementById("f-date").value = new Date().toISOString().slice(0, 10);
     ["f-amt","f-place","f-notes"].forEach(function(id) { document.getElementById(id).value = ""; });
+    var st = document.getElementById("ocr-status"); st.style.display = "none"; st.innerHTML = "";
     var pi = document.getElementById("previmg");
     pi.src = curImg || ""; pi.style.display = curImg ? "block" : "none";
     document.getElementById("mo-add").className = "mo on";
