@@ -14,7 +14,6 @@
 <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32.png">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="window.cvReady=true"></script>
 <style>
 :root{--ink:#1a1612;--paper:#f5f0e8;--cream:#ede8dc;--accent:#c8522a;--gold:#b89a4e;--muted:#7a7268;--success:#3a7d5a;--border:#d4cfc4;--gdrive:#1a73e8;--sh:0 2px 16px rgba(26,22,18,.1);--shlg:0 8px 40px rgba(26,22,18,.15)}
@@ -149,6 +148,7 @@ textarea{resize:vertical;min-height:55px}
       <div class="stat"><span class="sv" id="stat-count">0</span><span class="sl">Recus</span></div>
     </div>
     <button class="gdrive-btn co" id="gdrive-btn" onclick="handleDriveBtn()">&#9654; Google Drive</button>
+    <button class="gdrive-btn co" onclick="openApiKeyModal()" title="Configurer clé API" style="padding:.5rem .75rem">⚙️</button>
   </div>
 </header>
 
@@ -238,6 +238,28 @@ textarea{resize:vertical;min-height:55px}
   <div class="mbox">
     <div class="mhd"><span class="mtit">Detail du recu</span><button class="xcbtn" onclick="closeDet()">&#10005;</button></div>
     <div id="detcont"></div>
+  </div>
+</div>
+
+<!-- MODAL CONFIG API -->
+<div class="mo" id="mo-apikey">
+  <div class="mbox">
+    <div class="mhd">
+      <span class="mtit">Configuration OCR</span>
+    </div>
+    <div class="wbox">
+      <div class="wico">🔑</div>
+      <div class="wtxt">
+        Pour analyser vos tickets automatiquement, entrez votre clé API Anthropic.<br><br>
+        Elle sera stockée <strong>uniquement sur votre appareil</strong> et ne transite jamais par un serveur.
+      </div>
+    </div>
+    <div class="fg" style="margin-top:.8rem">
+      <label>Clé API Anthropic</label>
+      <input type="password" id="apikey-input" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <button class="bp" onclick="saveApiKey()">Enregistrer</button>
+    <button class="bs" onclick="skipApiKey()">Plus tard</button>
   </div>
 </div>
 
@@ -876,96 +898,122 @@ textarea{resize:vertical;min-height:55px}
     if (curImg) runOcr(curImg);
   }
 
-  // ---- OCR TESSERACT ----
-  function runOcr(imgData) {
-    var st = document.getElementById("ocr-status");
-    st.style.display = "block";
-    st.innerHTML = '<div class="ocr-loading"><div class="spin"></div><span>Analyse du ticket en cours…</span></div>';
+  // ---- CLÉ API ANTHROPIC ----
+  var anthropicKey = null;
 
-    Tesseract.recognize(imgData, "fra", {})
-      .then(function(result) {
-        var text = result.data.text || "";
-        var extracted = parseTicket(text);
-        prefillForm(extracted);
-        var badges = "";
-        if (extracted.date)   badges += '<span class="ocr-badge">✓ Date</span>';
-        if (extracted.amount) badges += '<span class="ocr-badge">✓ Montant</span>';
-        if (extracted.place)  badges += '<span class="ocr-badge">✓ Lieu</span>';
-        if (badges) {
-          st.innerHTML = '<div style="font-size:.78rem;color:var(--muted);padding:.4rem 0">Pré-rempli par OCR ' + badges + '</div>';
-        } else {
-          st.innerHTML = '<div style="font-size:.78rem;color:var(--muted);padding:.4rem 0">OCR : aucune donnée détectée — vérifiez la photo</div>';
-        }
-      })
-      .catch(function() {
-        st.innerHTML = '<div style="font-size:.78rem;color:var(--muted);padding:.4rem 0">OCR indisponible — remplissez manuellement</div>';
-      });
+  function loadApiKey() {
+    try { anthropicKey = localStorage.getItem("anthropic_key") || null; } catch(e) {}
   }
 
-  function parseTicket(text) {
-    var lines = text.split(/\n/).map(function(l){ return l.trim(); }).filter(Boolean);
-    var result = { date: null, amount: null, place: null };
+  window.saveApiKey = function() {
+    var val = document.getElementById("apikey-input").value.trim();
+    if (!val || !val.startsWith("sk-ant-")) { toast("Clé invalide (doit commencer par sk-ant-)", true); return; }
+    anthropicKey = val;
+    try { localStorage.setItem("anthropic_key", val); } catch(e) {}
+    document.getElementById("mo-apikey").className = "mo";
+    toast("Clé API enregistrée ✓");
+  };
 
-    // --- Montant : chercher le plus grand montant plausible (total) ---
-    var amtRx = /\b(\d{1,3}(?:[.,]\d{3})*[.,]\d{2})\s*(?:€|EUR|eur)?\b/gi;
-    var amounts = [];
-    var m;
-    while ((m = amtRx.exec(text)) !== null) {
-      var v = parseFloat(m[1].replace(/\s/g,"").replace(",","."));
-      if (!isNaN(v) && v > 0 && v < 1000) amounts.push(v);
+  window.skipApiKey = function() {
+    document.getElementById("mo-apikey").className = "mo";
+  };
+
+  window.openApiKeyModal = function() {
+    var inp = document.getElementById("apikey-input");
+    inp.value = anthropicKey || "";
+    document.getElementById("mo-apikey").className = "mo on";
+    setTimeout(function(){ inp.focus(); }, 300);
+  };
+
+  function checkApiKey() {
+    if (!anthropicKey) {
+      document.getElementById("mo-apikey").className = "mo on";
+      return false;
     }
-    // Prendre le plus grand (vraisemblablement le total)
-    if (amounts.length) result.amount = Math.max.apply(null, amounts).toFixed(2);
+    return true;
+  }
 
-    // --- Date ---
-    var datePatterns = [
-      // jj/mm/aaaa ou jj-mm-aaaa
-      /\b(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})\b/,
-      // aaaa-mm-jj
-      /\b(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})\b/
-    ];
-    for (var i = 0; i < datePatterns.length; i++) {
-      var dm = text.match(datePatterns[i]);
-      if (dm) {
-        var day, mon, year;
-        if (i === 0) {
-          day = parseInt(dm[1]); mon = parseInt(dm[2]); year = parseInt(dm[3]);
-          if (year < 100) year += 2000;
-        } else {
-          year = parseInt(dm[1]); mon = parseInt(dm[2]); day = parseInt(dm[3]);
-        }
-        if (day>=1&&day<=31&&mon>=1&&mon<=12&&year>=2000&&year<=2099) {
-          result.date = year + "-" + String(mon).padStart(2,"0") + "-" + String(day).padStart(2,"0");
-          break;
-        }
+  // ---- OCR VIA CLAUDE API ----
+  function runOcr(imgData) {
+    if (!checkApiKey()) {
+      // Clé absente : ouvrir modale config, l'OCR sera ignoré cette fois
+      return;
+    }
+
+    var st = document.getElementById("ocr-status");
+    st.style.display = "block";
+    st.innerHTML = '<div class="ocr-loading"><div class="spin"></div><span>Analyse du ticket par IA…</span></div>';
+
+    // Extraire base64 pur (sans le préfixe data:image/...;base64,)
+    var base64 = imgData.split(",")[1];
+    var mediaType = imgData.split(";")[0].split(":")[1] || "image/jpeg";
+
+    fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": anthropicKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-calls": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 256,
+        messages: [{
+          role: "user",
+          content: [
+            {
+              type: "image",
+              source: { type: "base64", media_type: mediaType, data: base64 }
+            },
+            {
+              type: "text",
+              text: "Analyse ce ticket de caisse ou reçu de restaurant français. Extrait uniquement ces informations en JSON strict, sans markdown, sans explication :\n{\"date\":\"YYYY-MM-DD ou null\",\"amount\":\"nombre décimal ou null\",\"place\":\"nom établissement ou null\"}\nPour le montant, prends le total final payé. Pour le lieu, prends le nom du restaurant ou magasin. Si une info est absente ou illisible, mets null."
+            }
+          ]
+        }]
+      })
+    })
+    .then(function(r) {
+      if (r.status === 401) { anthropicKey = null; try { localStorage.removeItem("anthropic_key"); } catch(e){} throw new Error("Clé API invalide"); }
+      if (!r.ok) throw new Error("Erreur API " + r.status);
+      return r.json();
+    })
+    .then(function(data) {
+      var text = (data.content && data.content[0] && data.content[0].text) || "";
+      var extracted;
+      try {
+        // Nettoyer au cas où il y aurait des backticks résiduels
+        text = text.replace(/```json|```/g, "").trim();
+        extracted = JSON.parse(text);
+      } catch(e) { throw new Error("Réponse non parseable"); }
+
+      prefillForm(extracted);
+      var badges = "";
+      if (extracted.date)   badges += '<span class="ocr-badge">✓ Date</span>';
+      if (extracted.amount) badges += '<span class="ocr-badge">✓ Montant</span>';
+      if (extracted.place)  badges += '<span class="ocr-badge">✓ Lieu</span>';
+      if (badges) {
+        st.innerHTML = '<div style="font-size:.78rem;color:var(--muted);padding:.4rem 0">Pré-rempli par IA ' + badges + '</div>';
+      } else {
+        st.innerHTML = '<div style="font-size:.78rem;color:var(--muted);padding:.4rem 0">IA : aucune donnée détectée — vérifiez la photo</div>';
       }
-    }
-
-    // --- Lieu : heuristique sur les premières lignes non-numériques ---
-    var skipRx = /^\d|total|sous.total|tva|ticket|recu|merci|bienvenue|addition|montant|espece|carte|cb|visa|master|facture|siret|siren|tpe|^table|^couvert|^serveur|^date|^heure/i;
-    var candidates = [];
-    for (var j = 0; j < Math.min(lines.length, 12); j++) {
-      var l = lines[j];
-      if (l.length >= 3 && l.length <= 40 && !skipRx.test(l) && !/^\W+$/.test(l)) {
-        candidates.push(l);
-        if (candidates.length >= 2) break;
-      }
-    }
-    if (candidates.length) {
-      // Préférer la plus courte des 2 candidates (souvent le nom de l'enseigne)
-      result.place = candidates.reduce(function(a,b){ return a.length <= b.length ? a : b; });
-      // Nettoyage basique
-      result.place = result.place.replace(/[*#_=]{2,}/g,"").trim();
-      if (result.place.length < 2) result.place = null;
-    }
-
-    return result;
+    })
+    .catch(function(e) {
+      var msg = e.message === "Clé API invalide"
+        ? 'Clé API invalide — <a href="#" onclick="openApiKeyModal();return false" style="color:var(--accent)">reconfigurer</a>'
+        : "Analyse IA indisponible — remplissez manuellement";
+      st.innerHTML = '<div style="font-size:.78rem;color:var(--muted);padding:.4rem 0">' + msg + '</div>';
+    });
   }
 
   function prefillForm(data) {
-    if (data.date)   document.getElementById("f-date").value  = data.date;
-    if (data.amount) document.getElementById("f-amt").value   = data.amount;
-    if (data.place)  document.getElementById("f-place").value = data.place;
+    if (data.date && /^\d{4}-\d{2}-\d{2}$/.test(data.date))
+      document.getElementById("f-date").value = data.date;
+    if (data.amount && !isNaN(parseFloat(data.amount)))
+      document.getElementById("f-amt").value = parseFloat(data.amount).toFixed(2);
+    if (data.place && typeof data.place === "string" && data.place.length > 1)
+      document.getElementById("f-place").value = data.place;
   }
 
   // ---- CAPTURE ----
@@ -1153,10 +1201,11 @@ textarea{resize:vertical;min-height:55px}
   }
 
   document.addEventListener("keydown", function(e) {
-    if (e.key === "Escape") { window.closeDriveModal(); window.closeAdd(); window.closeDet(); window.closeFso(); }
+    if (e.key === "Escape") { window.closeDriveModal(); window.closeAdd(); window.closeDet(); window.closeFso(); document.getElementById("mo-apikey").className = "mo"; }
   });
 
   loadLocal();
+  loadApiKey();
   handleRedirectReturn();
   updateBtn();
   render();
